@@ -2,7 +2,7 @@
 ADI.pages.asistente = (() => {
   const u = ADI.u, ui = ADI.ui;
   let ocupado = false;
-  let parcial = ''; // texto que va llegando de Claude mientras responde
+  let parcial = ''; // texto que va llegando de la IA mientras responde
 
   const SUGERIDAS = [
     '¿Cómo está mi negocio en resumen?',
@@ -43,9 +43,9 @@ ADI.pages.asistente = (() => {
           const box = el.querySelector('#msg-stream');
           if (box) { box.className = 'msg model'; box.innerHTML = u.md(t); const log = el.querySelector('#chat-log'); log.scrollTop = log.scrollHeight; }
         });
-        resp = { rol: 'model', texto: r.texto, modo: 'claude', modelo: r.modelo };
+        resp = { rol: 'model', texto: r.texto, modo: ADI.ia.proveedor(), modelo: r.modelo };
       } catch (e) {
-        resp = { rol: 'model', texto: `⚠ *No se pudo usar Claude: ${e.message}* Respuesta calculada por la app:\n\n${ADI.ia.respuestaLocal(q)}`, modo: 'local' };
+        resp = { rol: 'model', texto: `⚠ *No se pudo usar ${ADI.ia.nombreProveedor()}: ${e.message}* Respuesta calculada por la app:\n\n${ADI.ia.respuestaLocal(q)}`, modo: 'local' };
       }
     } else {
       resp = { rol: 'model', texto: ADI.ia.respuestaLocal(q), modo: 'local' };
@@ -69,8 +69,8 @@ ADI.pages.asistente = (() => {
 
     el.innerHTML = `<div class="chat">
       ${ui.banner(conIA ? 'ok' : 'info', conIA
-        ? `<b>Asistente conectado a Claude</b> (${u.esc(ADI.ia.modeloActual())}). La IA recibe un resumen de: ${u.esc(datos)}.`
-        : `<b>Modo local:</b> las respuestas las calcula la app sin IA. Para respuestas más completas, agrega tu clave de API de Claude en <a href="#/configuracion">Configuración</a>. Datos disponibles: ${u.esc(datos)}.`)}
+        ? `<b>Asistente conectado a ${ADI.ia.nombreProveedor() === 'Gemini' ? 'Google Gemini' : 'Claude'}</b> (${u.esc(ADI.ia.modeloActual())}). La IA recibe un resumen de: ${u.esc(datos)}.`
+        : `<b>Modo local:</b> las respuestas las calcula la app sin IA. Para respuestas más completas, agrega tu clave gratuita de Gemini en <a href="#/configuracion">Configuración</a>. Datos disponibles: ${u.esc(datos)}.`)}
       <div id="chat-log" class="chat-log" aria-live="polite" style="margin-top:12px"></div>
       ${ui.preguntas(SUGERIDAS)}
       <form class="chat-form" id="chat-form">

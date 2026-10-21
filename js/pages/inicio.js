@@ -20,7 +20,7 @@ ADI.pages.inicio = (() => {
       <div class="grid g3">
         ${paso(1, 'Carga tus ventas', 'Sube el Excel con los contratos y gastos. La app valida los datos y calcula los indicadores.', !!s.ventas?.registros?.length, `<button class="btn btn-primary" id="w-subir">${ui.icon('upload')} Subir Excel</button>${ADI.pages.ventas.hayIncluido() ? '<button class="btn" id="w-incl">Usar el incluido</button>' : ''}`)}
         ${paso(2, 'Importa Google Analytics 4', 'Sube el informe de GA4 (CSV, Excel o PDF) o usa datos de demostración mientras no tengas uno real.', !!s.ga4?.filas?.length, '<a class="btn" href="#/ga4">Ir a Analítica GA4</a>')}
-        ${paso(3, 'Activa la IA (opcional)', 'Pega tu clave de API de Claude para que el asistente responda con inteligencia artificial. Sin clave funciona en modo local.', !!s.config.claudeKey, '<a class="btn" href="#/configuracion">Configurar Claude</a>')}
+        ${paso(3, 'Activa la IA (opcional)', 'Pega tu clave gratuita de Google Gemini para que el asistente responda con inteligencia artificial. Sin clave funciona en modo local.', ADI.ia.disponible(), '<a class="btn" href="#/configuracion">Configurar la IA</a>')}
       </div>
     </div>`;
     el.querySelector('#w-subir').onclick = ADI.pages.ventas.subirExcel;
@@ -51,7 +51,7 @@ ADI.pages.inicio = (() => {
     if (nAdv) alertas.push(['info', `El Excel tiene ${nAdv} observación(es) de calidad de datos (nombres escritos distinto, fechas por verificar…). <a href="#/ventas">Revisar</a>`]);
     if (s.ga4?.esDemo) alertas.push(['warn', 'La analítica GA4 usa <b>datos de demostración</b>. Importa el informe real cuando esté disponible.']);
     if (!s.ga4) alertas.push(['info', 'Aún no hay informe de GA4. <a href="#/ga4">Importarlo o usar la demostración</a>.']);
-    if (!s.config.claudeKey) alertas.push(['info', 'El asistente funciona en modo local. <a href="#/configuracion">Agrega tu clave de Claude</a> para respuestas con IA.']);
+    if (!ADI.ia.disponible()) alertas.push(['info', 'El asistente funciona en modo local. <a href="#/configuracion">Agrega tu clave de Gemini</a> para respuestas con IA.']);
 
     el.innerHTML = `<div class="stack">
       ${hero(`Panel de gestión inteligente · datos de ${u.esc(a.periodoTxt.toLowerCase())}`)}

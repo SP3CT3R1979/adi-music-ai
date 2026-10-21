@@ -35,7 +35,7 @@ ADI.app = (() => {
     const n = s.ventas?.registros?.length || 0;
     const ex = n ? chip('ok', `Excel: ${n} ventas`, 'ventas') : chip('off', 'Sin Excel', 'ventas');
     const ga = s.ga4?.filas?.length ? chip(s.ga4.esDemo ? 'demo' : 'ok', s.ga4.esDemo ? 'GA4: demo' : 'GA4: cargado', 'ga4') : chip('off', 'Sin GA4', 'ga4');
-    const ia = s.config.claudeKey ? chip('ok', 'IA: Claude', 'configuracion') : chip('off', 'IA: modo local', 'configuracion');
+    const ia = ADI.ia.disponible() ? chip('ok', `IA: ${ADI.ia.nombreProveedor()}`, 'configuracion') : chip('off', 'IA: modo local', 'configuracion');
     document.getElementById('status').innerHTML = ex + ga + ia;
     document.getElementById('lock-btn').hidden = !s.config.pinHash;
   }

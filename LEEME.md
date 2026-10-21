@@ -17,14 +17,17 @@ Aplicación web con inteligencia artificial que ayuda a Yilmar a entender los da
 - Cada **cotización** se puede imprimir o guardar en PDF desde Cotizaciones.
 - **Respaldo** (Configuración): guarda todos los datos en un archivo para pasarlos a otra computadora.
 
-## Activar la IA (Claude, de Anthropic)
+## Activar la IA (Google Gemini, gratis)
 
-1. Entra a **https://platform.claude.com** e inicia sesión.
-2. Ve a **API Keys → Create Key** y copia la clave (empieza con `sk-ant-`).
-3. La API de Claude es de **pago por uso**: la cuenta necesita créditos en **Billing**. Cada pregunta cuesta unos centavos de dólar; conviene poner un límite de gasto.
-4. En la app ve a **Configuración**, pega la clave, elige el modelo y pulsa **Guardar y probar conexión**.
+1. Entra a **https://aistudio.google.com/apikey** con una cuenta de Google.
+2. Pulsa **Create API key** y copia la clave (empieza con `AIza`).
+3. En la app ve a **Configuración**, deja el proveedor en **Google Gemini (gratis)**, pega la clave y pulsa **Guardar y probar conexión**.
 
-Modelos disponibles: **Claude Opus 5.5** (el más capaz, recomendado), **Claude Sonnet 5.5** (más económico) y **Claude Haiku 5.5** (el más económico y rápido). La app usa el **SDK oficial de Anthropic** y llama a Claude directamente desde el navegador, así que la clave queda guardada en ese navegador: úsala solo en computadoras de confianza y quítala al terminar. Sin clave, el asistente funciona en **modo local**: responde con cálculos de la app, sin IA.
+La app prueba los modelos gratuitos de Gemini (Flash y Flash-Lite) en orden y se queda con el primero que responda; si uno no tiene cuota gratuita, pasa al siguiente. Si algo falla, muestra el mensaje exacto de Google.
+
+**Opción de pago: Claude (Anthropic).** En Configuración puedes cambiar el proveedor a Claude y usar una clave `sk-ant-` de platform.claude.com. La API de Claude se cobra aparte del plan Pro de claude.ai (necesita créditos en Billing).
+
+En ambos casos la clave queda guardada solo en ese navegador: si usas una computadora ajena, quítala al terminar. Sin clave, el asistente funciona en **modo local**: responde con cálculos de la app, sin IA.
 
 ## Módulos
 
@@ -38,14 +41,14 @@ Modelos disponibles: **Claude Opus 5.5** (el más capaz, recomendado), **Claude 
 | **Finanzas** | Separa ingresos, utilidad estimada, utilidad neta y efectivo disponible. Incluye presupuesto y metas con desviaciones explicadas, movimientos adicionales y necesidades de caja. |
 | **Cotizaciones** | Arma cotizaciones con costos, precios y márgenes. Alerta si el margen es bajo o la fecha está ocupada, registra cómo llegó el cliente, imprime en PDF y pasa la cotización a ventas. |
 | **Asistente IA** | Chat que responde con las cifras reales, separa hechos, interpretación y recomendación, y no inventa datos. |
-| **Configuración** | Clave de Claude, PIN de acceso, parámetros del negocio (gastos fijos, cuota, interés, impuestos), paquetes, respaldo de datos e historial. |
+| **Configuración** | Proveedor y clave de IA (Gemini o Claude), PIN de acceso, parámetros del negocio (gastos fijos, cuota, interés, impuestos), paquetes, respaldo de datos e historial. |
 
 ## Datos
 
 - **Excel de ADIX Music**: no se publica en este sitio por privacidad; se sube desde la app.
 - **GA4 de demostración**: `datos/ga4_demo_adi_music.csv`. **No son datos reales**: simulan una exportación de GA4 y la app los marca siempre como "demo". Cuando exista el informe real, se importa desde Analítica GA4.
 - Los datos se guardan **solo en el navegador** donde se usa la app. Para pasarlos a otra computadora, usa **Configuración → Descargar respaldo / Restaurar respaldo**.
-- Al preguntar a la IA, se envía a Claude un **resumen** de los datos (totales, KPI y meses), no el archivo completo.
+- Al preguntar a la IA, se envía a la IA un **resumen** de los datos (totales, KPI y meses), no el archivo completo.
 
 ## Identidad visual
 
@@ -58,7 +61,7 @@ La app usa el logo de **ADIX Music Sonidos** (carpeta `img/`) y sus colores: neg
 | Interfaz | HTML + CSS + JavaScript, sin compilación | React/Next.js, Google Stitch, Glide/AppSheet | Funciona con doble clic en cualquier computadora, sin instalar nada. Es fácil de modificar y no tiene costo. |
 | Leer Excel/CSV | SheetJS (incluido en la carpeta) | Subir a Google Sheets | Procesa `.xlsx`, `.xls` y `.csv` en el propio navegador; los datos no salen de la computadora. |
 | Gráficos | Chart.js (incluido) | Power BI, Looker Studio | Son gráficos interactivos dentro de la misma app, sin cuentas ni licencias. |
-| Inteligencia artificial | Claude (Anthropic) con su SDK oficial | Google Gemini, OpenAI | Muy buena calidad de análisis en español, lee PDF y explica con cifras. Pago por uso: centavos por pregunta. |
+| Inteligencia artificial | Google Gemini (gratis) y, como opción, Claude de Anthropic | OpenAI | Gemini tiene plan gratuito y lee PDF; Claude ofrece mayor calidad de análisis con pago por uso. |
 | Almacenamiento | Navegador (localStorage) + respaldo JSON | Supabase, Firebase | Es suficiente para un solo usuario y sin costo. Para varios usuarios o acceso desde el celular, el siguiente paso sería Supabase. |
 | GA4 | Importar CSV, Excel o PDF | API de GA4 (Google Analytics Data API) | No exige conexión inicial. La API se puede integrar después con una cuenta de servicio y un pequeño servidor. |
 

@@ -24,7 +24,7 @@ ADI.store = (() => {
     cotizaciones: [],
     chat: [],
     historial: [],
-    config: { claudeKey: '', claudeModelo: 'claude-opus-5-5', pinHash: '' },
+    config: { proveedorIA: 'gemini', geminiKey: '', geminiModelo: 'auto', geminiModelos: [], modeloDetectado: '', claudeKey: '', claudeModelo: 'claude-opus-5-5', pinHash: '' },
   });
 
   let state = load();
