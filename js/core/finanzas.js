@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — control financiero: distingue ingresos, utilidad estimada, utilidad neta y efectivo disponible. */
+/* ADIX Music AI — control financiero: distingue ingresos, utilidad estimada, utilidad neta y efectivo disponible. */
 ADI.fin = (() => {
   const u = ADI.u;
 

@@ -98,7 +98,7 @@ ADI.pages.configuracion = (() => {
       e.preventDefault();
       const fd = new FormData(e.target);
       ADI.store.update((x) => {
-        x.negocio.nombre = String(fd.get('nombre') || 'ADI MUSIC').trim();
+        x.negocio.nombre = String(fd.get('nombre') || 'ADIX Music Sonidos').trim();
         x.negocio.detalleFijos = String(fd.get('detalleFijos') || '').trim();
         ['gastosFijosMensuales', 'cuotaBanco', 'interesCuotaPct', 'tasaImpuestoPct', 'saldoCajaInicial'].forEach((k) => { x.negocio[k] = num(fd.get(k)); });
       });
@@ -129,7 +129,7 @@ ADI.pages.configuracion = (() => {
       inp.onchange = async () => {
         try {
           const data = JSON.parse(await u.readAsText(inp.files[0]));
-          if (!data || typeof data !== 'object' || !('negocio' in data)) throw new Error('El archivo no es un respaldo de ADI MUSIC AI.');
+          if (!data || typeof data !== 'object' || !('negocio' in data)) throw new Error('El archivo no es un respaldo de ADIX Music AI.');
           if (!confirm('Se reemplazarán los datos actuales por los del respaldo. ¿Continuar?')) return;
           const cfg = ADI.store.get().config;
           ADI.store.replaceAll({ ...data, config: { ...data.config, geminiKey: cfg.geminiKey, pinHash: cfg.pinHash } });

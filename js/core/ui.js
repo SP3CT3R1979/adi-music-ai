@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — componentes visuales reutilizables. */
+/* ADIX Music AI — componentes visuales reutilizables. */
 ADI.ui = (() => {
   const u = ADI.u;
   const svg = (d, cls = 'ico') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;

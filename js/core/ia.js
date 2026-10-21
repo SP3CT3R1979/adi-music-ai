@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — asistente con inteligencia artificial (Google Gemini) y respuestas locales de respaldo. */
+/* ADIX Music AI — asistente con inteligencia artificial (Google Gemini) y respuestas locales de respaldo. */
 ADI.ia = (() => {
   const u = ADI.u;
   const API = 'https://generativelanguage.googleapis.com/v1beta';
@@ -103,7 +103,7 @@ ADI.ia = (() => {
     const neg = state.negocio;
     const ctx = {
       negocio: {
-        nombre: neg.nombre, rubro: 'Servicio de sonido y música para eventos (matrimonios, bautizos, fiestas patronales, carnavales) en Cusco, Perú',
+        nombre: neg.nombre, rubro: 'Alquiler de sonido, iluminación, pantallas LED y escenarios para eventos (matrimonios, bautizos, fiestas patronales, carnavales) en Cusco, Perú. Lema: "Hacemos que tu evento suene increíble"',
         moneda: 'Soles peruanos (S/)', gastosFijosMensuales: neg.gastosFijosMensuales, detalleGastosFijos: neg.detalleFijos, cuotaBancariaMensual: neg.cuotaBanco,
         interesCuotaPct: neg.interesCuotaPct, tasaImpuestoPct: neg.tasaImpuestoPct,
       },
@@ -143,7 +143,7 @@ ADI.ia = (() => {
     } else ctx.proyeccion = p.motivo;
     if (!g.vacio) {
       ctx.ga4 = {
-        esDemo: g.esDemo, aviso: g.esDemo ? 'DATOS DE DEMOSTRACIÓN: no son datos reales de ADI MUSIC.' : undefined, archivo: state.ga4?.fuente?.archivo,
+        esDemo: g.esDemo, aviso: g.esDemo ? 'DATOS DE DEMOSTRACIÓN: no son datos reales de ADIX Music.' : undefined, archivo: state.ga4?.fuente?.archivo,
         total: { usuarios: g.total.usuarios, usuariosNuevos: g.total.usuariosNuevos, sesiones: g.total.sesiones, tasaInteraccion: r2(g.total.tasaInteraccion), eventosClave: g.total.eventosClave, tasaConversion: r2(g.total.tasaConversion), inversion: r0(g.total.inversion), costoPorEventoClave: r2(g.total.cpa) },
         porMes: g.porMes.map((m) => ({ mes: m.mes, usuarios: m.usuarios, sesiones: m.sesiones, eventosClave: m.eventosClave, inversion: r0(m.inversion) })),
         porCanal: g.porCanal.map((c) => ({ canal: c.nombre, descripcion: ADI.ga4.nombreCanal(c.nombre), usuarios: c.usuarios, sesiones: c.sesiones, tasaInteraccion: r2(c.tasaInteraccion), eventosClave: c.eventosClave, tasaConversion: r2(c.tasaConversion) })),
@@ -157,7 +157,7 @@ ADI.ia = (() => {
     return ctx;
   }
 
-  const REGLAS = `Eres el asistente de análisis de ADI MUSIC AI, una aplicación que ayuda a Yilmar, quien dirige ADI MUSIC (servicio de sonido y música para eventos en Cusco, Perú), a entender los datos del negocio y tomar decisiones.
+  const REGLAS = `Eres el asistente de análisis de ADIX Music AI, una aplicación que ayuda a Yilmar, quien dirige ADIX Music Sonidos (también llamada ADI MUSIC: alquiler de sonido, iluminación, pantallas LED y escenarios para eventos en Cusco, Perú), a entender los datos del negocio y tomar decisiones.
 
 Reglas obligatorias:
 1. Responde en español sencillo, para alguien que no conoce términos técnicos ni financieros. Si usas un término técnico (KPI, tasa de interacción, margen, ROAS, flujo de caja…), explícalo en una frase.

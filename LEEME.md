@@ -1,13 +1,13 @@
-# ADI MUSIC AI — Aplicación inteligente para la gestión empresarial
+# ADIX Music AI — Aplicación inteligente para la gestión empresarial de ADIX Music Sonidos
 
-Aplicación web con inteligencia artificial que ayuda a Yilmar a entender los datos de ADI MUSIC, controlar sus finanzas, proyectar ventas y decidir sobre publicidad.
+Aplicación web con inteligencia artificial que ayuda a Yilmar a entender los datos de ADIX Music, controlar sus finanzas, proyectar ventas y decidir sobre publicidad.
 
 ## Cómo abrirla
 
 **Versión publicada:** https://sp3ct3r1979.github.io/adi-music-ai/
 
 1. Abre el enlace en Chrome o Edge (computadora o celular).
-2. En **Inicio** o **Ventas y KPI** pulsa **"Subir Excel"** y elige el archivo de ADI MUSIC. Por privacidad, el Excel del negocio **no está publicado** en este sitio: se carga desde la computadora y se queda solo en ese navegador.
+2. En **Inicio** o **Ventas y KPI** pulsa **"Subir Excel"** y elige el archivo de ADIX Music. Por privacidad, el Excel del negocio **no está publicado** en este sitio: se carga desde la computadora y se queda solo en ese navegador.
 3. En **Analítica GA4** importa el informe de Google Analytics 4 o usa los **datos de demostración**.
 
 ## Exportar resultados
@@ -41,10 +41,14 @@ La app elige sola el mejor modelo "Flash" disponible para esa clave. Sin clave, 
 
 ## Datos
 
-- **Excel de ADI MUSIC**: no se publica en este sitio por privacidad; se sube desde la app.
+- **Excel de ADIX Music**: no se publica en este sitio por privacidad; se sube desde la app.
 - **GA4 de demostración**: `datos/ga4_demo_adi_music.csv`. **No son datos reales**: simulan una exportación de GA4 y la app los marca siempre como "demo". Cuando exista el informe real, se importa desde Analítica GA4.
 - Los datos se guardan **solo en el navegador** donde se usa la app. Para pasarlos a otra computadora, usa **Configuración → Descargar respaldo / Restaurar respaldo**.
 - Al preguntar a la IA, se envía a Gemini un **resumen** de los datos (totales, KPI y meses), no el archivo completo.
+
+## Identidad visual
+
+La app usa el logo de **ADIX Music Sonidos** (carpeta `img/`) y sus colores: negro, rojo y blanco, con el azul de los escenarios como color de apoyo en los gráficos. El logo aparece en el menú, en Inicio, en la pantalla de PIN, en la pestaña del navegador, en las cotizaciones impresas y en los PDF.
 
 ## Tecnologías elegidas y por qué
 

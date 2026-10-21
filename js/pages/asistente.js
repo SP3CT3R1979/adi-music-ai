@@ -22,7 +22,7 @@ ADI.pages.asistente = (() => {
   function pintarLog(el) {
     const s = ADI.store.get();
     const log = el.querySelector('#chat-log');
-    log.innerHTML = s.chat.length ? s.chat.map(burbuja).join('') : `<div class="msg model"><p>¡Hola! Soy el asistente de <b>ADI MUSIC AI</b>. Puedo explicarte tus ventas, tus finanzas, las proyecciones y los resultados de GA4 con palabras sencillas, y ayudarte a evaluar decisiones.</p><p>Siempre te mostraré las cifras en las que me baso y te diré cuando falten datos.</p></div>`;
+    log.innerHTML = s.chat.length ? s.chat.map(burbuja).join('') : `<div class="msg model"><p>¡Hola! Soy el asistente de <b>ADIX Music AI</b>. Puedo explicarte tus ventas, tus finanzas, las proyecciones y los resultados de GA4 con palabras sencillas, y ayudarte a evaluar decisiones.</p><p>Siempre te mostraré las cifras en las que me baso y te diré cuando falten datos.</p></div>`;
     if (ocupado) log.insertAdjacentHTML('beforeend', '<div class="msg model pensando"><span class="dots">Analizando tus datos</span></div>');
     log.scrollTop = log.scrollHeight;
   }

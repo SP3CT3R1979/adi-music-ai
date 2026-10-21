@@ -91,7 +91,7 @@ ADI.pages.ventas = (() => {
     if (!s.ventas?.registros?.length) {
       el.innerHTML = ui.card('', ui.vacio('Sube los registros de ventas',
         'Carga un Excel (.xlsx, .xls) o CSV con fecha, monto y, si los tienes, producto o paquete, lugar y tipo de venta. La app detecta las columnas, valida los datos y calcula los KPI que sean posibles.',
-        `<button class="btn btn-primary" id="v-subir">${ui.icon('upload')} Subir Excel o CSV</button>${hayIncluido() ? '<button class="btn" id="v-incluido">Usar el Excel de ADI MUSIC incluido</button>' : ''}`));
+        `<button class="btn btn-primary" id="v-subir">${ui.icon('upload')} Subir Excel o CSV</button>${hayIncluido() ? '<button class="btn" id="v-incluido">Usar el Excel del negocio incluido</button>' : ''}`));
       el.querySelector('#v-subir').onclick = subirExcel;
       if (hayIncluido()) el.querySelector('#v-incluido').onclick = usarIncluido;
       return;
@@ -164,13 +164,13 @@ ADI.pages.ventas = (() => {
     C.barras(el.querySelector('#c-mes'), {
       labels: etiquetas, moneda: true, apilado: true, ejeDerecho: { moneda: false },
       series: [...productos.map((p) => ({ label: p, data: a.porMes.map((m) => m.porProducto[p]?.ingresos || 0), moneda: true })),
-        { label: 'Eventos', data: a.porMes.map((m) => m.eventos), tipo: 'line', ejeDerecho: true, color: '#1c1830', moneda: false }],
+        { label: 'Eventos', data: a.porMes.map((m) => m.eventos), tipo: 'line', ejeDerecho: true, color: ADI.charts.C.ambar, moneda: false }],
     });
     C.dona(el.querySelector('#c-prod'), { labels: productos, data: a.porProducto.map((p) => p.ingresos), moneda: true });
     const top = a.porLugar.slice(0, 10);
-    C.barras(el.querySelector('#c-lugar'), { labels: top.map((l) => l.nombre.length > 26 ? l.nombre.slice(0, 25) + '…' : l.nombre), series: [{ label: 'Ingresos', data: top.map((l) => l.ingresos), color: '#6D28D9' }], moneda: true, horizontal: true });
+    C.barras(el.querySelector('#c-lugar'), { labels: top.map((l) => l.nombre.length > 26 ? l.nombre.slice(0, 25) + '…' : l.nombre), series: [{ label: 'Ingresos', data: top.map((l) => l.ingresos), color: ADI.charts.C.rojo }], moneda: true, horizontal: true });
     const cats = [...a.porCategoria].sort((x, y) => y.eventos - x.eventos);
-    C.barras(el.querySelector('#c-tipo'), { labels: cats.map((c) => c.nombre), series: [{ label: 'Eventos', data: cats.map((c) => c.eventos), color: '#F59E0B' }], horizontal: true });
+    C.barras(el.querySelector('#c-tipo'), { labels: cats.map((c) => c.nombre), series: [{ label: 'Eventos', data: cats.map((c) => c.eventos), color: ADI.charts.C.negro }], horizontal: true });
 
     // Tabla con búsqueda
     const pintarTabla = () => {

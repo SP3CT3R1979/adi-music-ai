@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — cálculo de KPI, patrones y decisiones a partir de los registros de ventas. */
+/* ADIX Music AI — cálculo de KPI, patrones y decisiones a partir de los registros de ventas. */
 ADI.kpi = (() => {
   const u = ADI.u;
   const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];

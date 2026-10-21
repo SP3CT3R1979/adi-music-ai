@@ -2,10 +2,21 @@
 ADI.pages.inicio = (() => {
   const u = ADI.u, ui = ADI.ui;
 
+  // Encabezado con el logo y los servicios de la marca.
+  const hero = (texto) => `<section class="hero">
+      <img src="img/logo-adix.jpg" alt="Logo de ADIX Music Sonidos">
+      <div>
+        <h2>ADIX Music Sonidos</h2>
+        <div class="lema">Hacemos que tu evento suene increíble</div>
+        <p>${texto}</p>
+        <div class="servicios"><span>Sonido</span><span>Iluminación</span><span>Pantallas LED</span><span>Escenarios</span></div>
+      </div>
+    </section>`;
+
   function bienvenida(el, s) {
     const paso = (n, titulo, texto, hecho, botones) => `<div class="card"><div class="row"><span class="tag ${hecho ? 'tag-green' : 'tag-violet'}">${hecho ? '✔ Listo' : 'Paso ' + n}</span></div><h3 style="margin:10px 0 6px">${titulo}</h3><p class="muted">${texto}</p><div class="row">${botones}</div></div>`;
     el.innerHTML = `<div class="stack">
-      ${ui.card('', `<div class="empty" style="padding:24px 10px">${ui.icon('music', 'ico ico-xl')}<h3>Bienvenido a ADI MUSIC AI</h3><p>Esta aplicación convierte los datos del negocio en información fácil de entender: ventas, KPI, proyecciones, finanzas, publicidad y un asistente con inteligencia artificial.</p></div>`)}
+      ${hero('Bienvenido al panel de gestión inteligente: convierte los datos del negocio en información fácil de entender — ventas, KPI, proyecciones, finanzas, publicidad y un asistente con inteligencia artificial.')}
       <div class="grid g3">
         ${paso(1, 'Carga tus ventas', 'Sube el Excel con los contratos y gastos. La app valida los datos y calcula los indicadores.', !!s.ventas?.registros?.length, `<button class="btn btn-primary" id="w-subir">${ui.icon('upload')} Subir Excel</button>${ADI.pages.ventas.hayIncluido() ? '<button class="btn" id="w-incl">Usar el incluido</button>' : ''}`)}
         ${paso(2, 'Importa Google Analytics 4', 'Sube el informe de GA4 (CSV, Excel o PDF) o usa datos de demostración mientras no tengas uno real.', !!s.ga4?.filas?.length, '<a class="btn" href="#/ga4">Ir a Analítica GA4</a>')}
@@ -43,6 +54,7 @@ ADI.pages.inicio = (() => {
     if (!s.config.geminiKey) alertas.push(['info', 'El asistente funciona en modo local. <a href="#/configuracion">Agrega tu clave de Gemini</a> para respuestas con IA.']);
 
     el.innerHTML = `<div class="stack">
+      ${hero(`Panel de gestión inteligente · datos de ${u.esc(a.periodoTxt.toLowerCase())}`)}
       <div class="kpis">
         ${ui.kpi({ titulo: 'Ingresos', valor: u.fmtMoney(t.ingresos), sub: a.periodoTxt })}
         ${ui.kpi({ titulo: 'Eventos', valor: u.fmtNum(t.eventos), sub: `${u.fmtNum(t.eventos / (a.completos.length + (a.mesParcial ? a.diaCorte / u.daysInMonth(a.mesParcial) : 0)), 1)} por mes` })}
@@ -64,10 +76,14 @@ ADI.pages.inicio = (() => {
 
     const meses = a.porMes;
     ADI.charts.barras(el.querySelector('#i-c1'), {
-      labels: meses.map((m) => u.monthLabel(m.mes, true) + (m.parcial ? '*' : '')), moneda: true,
+      labels: meses.map((m) => u.monthLabel(m.mes, true) + (m.parcial ? '*' : '')), moneda: true, apilado: true,
       series: [
-        { label: 'Margen del mes', data: meses.map((m) => m.margen ?? m.ingresos), color: meses.map((m) => (a.equilibrio && (m.margen ?? 0) < a.equilibrio.carga ? '#F59E0B' : '#6D28D9')) },
-        ...(a.equilibrio ? [{ label: 'Fijos + cuota', data: meses.map(() => a.equilibrio.carga), tipo: 'line', color: '#DC2626', punteado: true }] : []),
+        // Dos series apiladas para que la leyenda distinga los meses que cubren los pagos de los que no.
+        { label: 'Cubre los pagos', data: meses.map((m) => (!a.equilibrio || (m.margen ?? 0) >= a.equilibrio.carga ? (m.margen ?? m.ingresos) : null)), color: ADI.charts.C.rojo, stack: 'm' },
+        ...(a.equilibrio ? [
+          { label: 'No alcanza', data: meses.map((m) => ((m.margen ?? 0) < a.equilibrio.carga ? m.margen : null)), color: ADI.charts.C.ambar, stack: 'm' },
+          { label: 'Fijos + cuota', data: meses.map(() => a.equilibrio.carga), tipo: 'line', color: ADI.charts.C.negro, punteado: true, stack: 'linea' },
+        ] : []),
       ],
     });
   }

@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — estructura de la aplicación: menú, navegación, estado y acceso con PIN. */
+/* ADIX Music AI — estructura de la aplicación: menú, navegación, estado y acceso con PIN. */
 ADI.pages = ADI.pages || {};
 
 ADI.app = (() => {
@@ -52,7 +52,7 @@ ADI.app = (() => {
     document.body.classList.remove('nav-open');
     document.querySelectorAll('#nav a').forEach((a) => a.classList.toggle('active', a.dataset.ruta === r.id));
     document.getElementById('page-title').textContent = r.titulo;
-    document.title = `${r.titulo} · ADI MUSIC AI`;
+    document.title = `${r.titulo} · ADIX Music AI`;
     estadoDatos();
     const view = document.getElementById('view');
     view.innerHTML = '';
@@ -74,7 +74,8 @@ ADI.app = (() => {
     const lock = document.getElementById('lock');
     lock.hidden = false;
     lock.innerHTML = `<form class="lock-box" id="lock-form">
-        <div class="brand brand-lg">${ui.icon('music')}<span>ADI MUSIC <b>AI</b></span></div>
+        <img class="lock-logo" src="img/logo-adix.jpg" alt="Logo de ADIX Music Sonidos">
+        <h2>ADIX Music AI</h2>
         <p>Ingresa tu PIN para ver la información del negocio.</p>
         <input id="lock-pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN" aria-label="PIN" required>
         <button class="btn btn-primary" type="submit">Entrar</button>

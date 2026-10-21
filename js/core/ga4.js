@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — importación y análisis de informes de Google Analytics 4 (CSV, Excel o PDF). */
+/* ADIX Music AI — importación y análisis de informes de Google Analytics 4 (CSV, Excel o PDF). */
 ADI.ga4 = (() => {
   const u = ADI.u;
 
@@ -205,7 +205,7 @@ ADI.ga4 = (() => {
         if (r != null) out.push({ tipo: 'hipotesis', texto: `Relación entre contactos de GA4 y eventos vendidos en el mismo mes: correlación ${u.fmtNum(r, 2)} (${Math.abs(r) >= 0.6 ? 'se mueven juntos' : Math.abs(r) >= 0.3 ? 'relación débil' : 'casi no se relacionan'}). Es solo una coincidencia en el tiempo: no prueba que la web o la publicidad causen las ventas.` });
       }
     }
-    if (an.esDemo) out.push({ tipo: 'aviso', texto: 'Estos hallazgos salen de **datos de demostración**, no de datos reales de ADI MUSIC.' });
+    if (an.esDemo) out.push({ tipo: 'aviso', texto: 'Estos hallazgos salen de **datos de demostración**, no de datos reales de ADIX Music.' });
     return out;
   }
 

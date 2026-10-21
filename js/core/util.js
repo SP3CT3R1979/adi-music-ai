@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — utilidades generales (formato, fechas, números, estadística, DOM). */
+/* ADIX Music AI — utilidades generales (formato, fechas, números, estadística, DOM). */
 window.ADI = window.ADI || {};
 
 ADI.u = (() => {

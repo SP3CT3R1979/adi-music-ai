@@ -1,11 +1,11 @@
-/* ADI MUSIC AI — almacenamiento local de los datos del negocio (se guardan solo en este navegador). */
+/* ADIX Music AI — almacenamiento local de los datos del negocio (se guardan solo en este navegador). */
 ADI.store = (() => {
   const KEY = 'adi-music-ai-v1';
 
   const defaultState = () => ({
     version: 1,
     negocio: {
-      nombre: 'ADI MUSIC',
+      nombre: 'ADIX Music Sonidos',
       gastosFijosMensuales: null,
       detalleFijos: '',
       cuotaBanco: null,
@@ -36,6 +36,7 @@ ADI.store = (() => {
       const s = JSON.parse(raw);
       const d = defaultState();
       // Mezcla con los valores por defecto para tolerar versiones anteriores.
+      if (s.negocio && s.negocio.nombre === 'ADI MUSIC') s.negocio.nombre = d.negocio.nombre; // nombre anterior al logo
       return {
         ...d, ...s,
         negocio: { ...d.negocio, ...(s.negocio || {}) },

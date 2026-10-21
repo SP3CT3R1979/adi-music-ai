@@ -73,9 +73,9 @@ ADI.pages.finanzas = (() => {
     ADI.charts.barras(el.querySelector('#f-c1'), {
       labels: L.filas.map((f) => u.monthLabel(f.mes, true) + (f.parcial ? '*' : '')), moneda: true,
       series: [
-        { label: 'Utilidad estimada', data: L.filas.map((f) => f.utilidadEstimada), color: '#6D28D9' },
-        { label: 'Flujo de caja (tras cuota)', data: L.filas.map((f) => f.flujo), color: '#F59E0B' },
-        { label: 'Efectivo acumulado', data: L.filas.map((f) => f.acumulado), tipo: 'line', color: '#0EA5A4' },
+        { label: 'Utilidad estimada', data: L.filas.map((f) => f.utilidadEstimada), color: ADI.charts.C.negro },
+        { label: 'Flujo de caja (tras cuota)', data: L.filas.map((f) => f.flujo), color: ADI.charts.C.rojo },
+        { label: 'Efectivo acumulado', data: L.filas.map((f) => f.acumulado), tipo: 'line', color: ADI.charts.C.azul },
       ],
     });
 

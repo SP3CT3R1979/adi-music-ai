@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — lectura y validación de archivos Excel/CSV con registros de ventas. */
+/* ADIX Music AI — lectura y validación de archivos Excel/CSV con registros de ventas. */
 ADI.excel = (() => {
   const u = ADI.u;
 

@@ -49,8 +49,9 @@ ADI.pages.cotizaciones = (() => {
   function documento(c, s) {
     const t = calcular(c);
     return `<div class="cot-doc">
-      <h2>${u.esc(s.negocio.nombre || 'ADI MUSIC')} — Cotización ${u.esc(c.numero)}</h2>
-      <p class="muted">Fecha: ${u.fmtDate(c.fecha)} · Válida por 15 días</p>
+      <div class="cot-head"><img src="img/logo-adix-160.jpg" alt="Logo">
+        <div><h2>${u.esc(s.negocio.nombre || 'ADIX Music Sonidos')} — Cotización ${u.esc(c.numero)}</h2>
+        <p class="muted" style="margin:0">Sonido · Iluminación · Pantallas LED · Escenarios — Fecha: ${u.fmtDate(c.fecha)} · Válida por 15 días</p></div></div>
       <p><b>Cliente:</b> ${u.esc(c.cliente || '—')}${c.telefono ? ` · ${u.esc(c.telefono)}` : ''}<br><b>Evento:</b> ${u.esc(c.tipo || '—')} · ${u.esc(c.lugar || '—')} · ${c.fechaEvento ? u.fmtDate(c.fechaEvento) : 'fecha por definir'}</p>
       <table><thead><tr><th>Concepto</th><th class="num">Cant.</th><th class="num">Precio unit.</th><th class="num">Importe</th></tr></thead>
       <tbody>${c.items.map((i) => `<tr><td>${u.esc(i.concepto)}</td><td class="num">${u.fmtNum(+i.cantidad)}</td><td class="num">${u.fmtMoney(+i.precio, 2)}</td><td class="num">${u.fmtMoney(i.cantidad * i.precio, 2)}</td></tr>`).join('')}

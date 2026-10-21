@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — apoyo para decisiones comerciales y de publicidad. */
+/* ADIX Music AI — apoyo para decisiones comerciales y de publicidad. */
 ADI.pub = (() => {
   const u = ADI.u;
   const mesTxt = (k) => u.MESES[+k.slice(5) - 1].toLowerCase();

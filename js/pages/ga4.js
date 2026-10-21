@@ -35,7 +35,7 @@ ADI.pages.ga4 = (() => {
         'Sube el informe exportado desde GA4 en CSV, Excel o PDF (el PDF lo lee la IA). Mientras no tengas un informe real puedes usar datos de demostración, que siempre se mostrarán marcados como tales.',
         `<button class="btn btn-primary" id="g-imp">${ui.icon('upload')} Importar informe</button><button class="btn" id="g-demo">Usar datos de demostración</button>`))}
         ${ui.card('¿Cómo exportar el informe desde GA4?', `<ol class="list">
-          <li>Entra a <b>analytics.google.com</b> y abre la propiedad de ADI MUSIC.</li>
+          <li>Entra a <b>analytics.google.com</b> y abre la propiedad de ADIX Music.</li>
           <li>Ve a <b>Informes → Adquisición → Adquisición de tráfico</b> (o crea una Exploración con las dimensiones <i>Año y mes</i>, <i>Grupo de canales</i> y <i>Campaña</i>).</li>
           <li>Elige el rango de fechas y pulsa <b>Compartir este informe → Descargar archivo → CSV</b>.</li>
           <li>Importa ese archivo aquí. Más adelante se puede conectar la API de GA4 para que se actualice solo.</li></ol>`)}
@@ -61,7 +61,7 @@ ADI.pages.ga4 = (() => {
     const ultimoParcial = ventas.mesParcial && meses[meses.length - 1] === ventas.mesParcial;
 
     el.innerHTML = `<div class="stack">
-      ${s.ga4.esDemo ? ui.banner('warn', '<b>Datos de demostración.</b> Estas cifras simulan un informe de GA4 para mostrar cómo funciona el módulo; <b>no son datos reales de ADI MUSIC</b>. Importa el informe real cuando esté disponible.') : ''}
+      ${s.ga4.esDemo ? ui.banner('warn', '<b>Datos de demostración.</b> Estas cifras simulan un informe de GA4 para mostrar cómo funciona el módulo; <b>no son datos reales de ADIX Music</b>. Importa el informe real cuando esté disponible.') : ''}
       ${ui.card(`Informe: ${u.esc(s.ga4.fuente.archivo)}`, `
         <div class="row"><span class="muted small">${s.ga4.fuente.tipo} · ${s.ga4.filas.length} filas · ${tieneMeses ? `${u.monthLabel(meses[0])} – ${u.monthLabel(meses[meses.length - 1])}` : 'sin desglose por mes'}</span><span class="spacer"></span>
         ${tieneMeses ? `<div class="filtros"><label>Mes <select id="g-a">${optsMes(comp.actual)}</select></label><label>comparar con <select id="g-b">${optsMes(comp.base)}</select></label></div>` : ''}</div>
@@ -79,7 +79,7 @@ ADI.pages.ga4 = (() => {
         ${A.cpa != null ? ui.kpi({ titulo: 'Costo por contacto', valor: u.fmtMoney(A.cpa, 2), delta: dl('cpa'), deltaBueno: B && B.cpa ? A.cpa <= B.cpa : null, info: G.cpa }) : ''}
       </div>
       ${tieneMeses ? `<div class="grid g2">
-        ${ui.card('Usuarios y contactos por mes', '<div class="chart"><canvas id="g-c1"></canvas></div>', { sub: 'Línea morada: usuarios. Línea naranja: eventos clave (eje derecho).' })}
+        ${ui.card('Usuarios y contactos por mes', '<div class="chart"><canvas id="g-c1"></canvas></div>', { sub: 'Línea roja: usuarios. Línea negra: eventos clave (eje derecho).' })}
         ${ui.card('Contactos de GA4 vs eventos vendidos', '<div class="chart"><canvas id="g-c3"></canvas></div>', { sub: 'Coincidencia en el tiempo: no prueba causa y efecto.' })}
       </div>` : ''}
       <div class="grid g2">
@@ -100,13 +100,13 @@ ADI.pages.ga4 = (() => {
       el.querySelector('#g-b').onchange = (e) => { comp.base = e.target.value; render(el); };
       const lab = meses.map((m) => u.monthLabel(m, true));
       ADI.charts.lineas(el.querySelector('#g-c1'), { labels: lab, ejeDerecho: { moneda: false },
-        series: [{ label: 'Usuarios', data: an.porMes.map((m) => m.usuarios), color: '#6D28D9' }, { label: 'Eventos clave', data: an.porMes.map((m) => m.eventosClave), color: '#F59E0B', ejeDerecho: true }] });
+        series: [{ label: 'Usuarios', data: an.porMes.map((m) => m.usuarios), color: ADI.charts.C.rojo }, { label: 'Eventos clave', data: an.porMes.map((m) => m.eventosClave), color: ADI.charts.C.negro, ejeDerecho: true }] });
       ADI.charts.barras(el.querySelector('#g-c3'), { labels: lab, ejeDerecho: { moneda: false },
-        series: [{ label: 'Eventos vendidos (Excel)', data: meses.map((m) => ventas.vacio ? 0 : (ventas.porMes.find((v) => v.mes === m)?.eventos || 0)), color: '#0EA5A4' },
-          { label: 'Contactos GA4', data: an.porMes.map((m) => m.eventosClave), tipo: 'line', color: '#F59E0B', ejeDerecho: true }] });
+        series: [{ label: 'Eventos vendidos (Excel)', data: meses.map((m) => ventas.vacio ? 0 : (ventas.porMes.find((v) => v.mes === m)?.eventos || 0)), color: ADI.charts.C.negro },
+          { label: 'Contactos GA4', data: an.porMes.map((m) => m.eventosClave), tipo: 'line', color: ADI.charts.C.rojo, ejeDerecho: true }] });
     }
     ADI.charts.barras(el.querySelector('#g-c2'), { labels: an.porCanal.map((c) => c.nombre), ejeDerecho: { moneda: false },
-      series: [{ label: 'Usuarios', data: an.porCanal.map((c) => c.usuarios), color: '#6D28D9' }, { label: 'Contactos', data: an.porCanal.map((c) => c.eventosClave), color: '#F59E0B', ejeDerecho: true }] });
+      series: [{ label: 'Usuarios', data: an.porCanal.map((c) => c.usuarios), color: ADI.charts.C.rojo }, { label: 'Contactos', data: an.porCanal.map((c) => c.eventosClave), color: ADI.charts.C.negro, ejeDerecho: true }] });
   }
 
   return { render };

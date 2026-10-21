@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — proyecciones futuras con un método simple y explicable (promedio + estacionalidad + escenarios). */
+/* ADIX Music AI — proyecciones futuras con un método simple y explicable (promedio + estacionalidad + escenarios). */
 ADI.proy = (() => {
   const u = ADI.u;
   const ESC = ['conservador', 'intermedio', 'optimista'];

@@ -1,4 +1,4 @@
-/* ADI MUSIC AI — exportación de resultados a Excel y a PDF (impresión de la pantalla actual). */
+/* ADIX Music AI — exportación de resultados a Excel y a PDF (impresión de la pantalla actual). */
 ADI.exportar = (() => {
   const u = ADI.u;
   const r2 = (x) => (x == null || !isFinite(x) ? null : Math.round(x * 100) / 100);
@@ -37,7 +37,7 @@ ADI.exportar = (() => {
     const ahora = new Date().toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' });
 
     // 1. Resumen
-    const res = [['ADI MUSIC AI — Resultados exportados'], ['Exportado', ahora], []];
+    const res = [[`${s.negocio.nombre || 'ADIX Music Sonidos'} — Resultados exportados (ADIX Music AI)`], ['Exportado', ahora], []];
     if (!v.vacio) {
       res.push(['Fuente de ventas', s.ventas.fuente?.archivo || '—'], ['Periodo', v.periodoTxt], []);
       res.push(['Indicador', 'Valor', 'Nota']);
@@ -102,7 +102,7 @@ ADI.exportar = (() => {
 
     // 9. GA4
     if (!g.vacio) {
-      const aviso = g.esDemo ? [['DATOS DE DEMOSTRACIÓN — no son datos reales de ADI MUSIC'], []] : [];
+      const aviso = g.esDemo ? [['DATOS DE DEMOSTRACIÓN — no son datos reales del negocio'], []] : [];
       add('GA4', hoja([...aviso,
         ['Mes', 'Usuarios', 'Usuarios nuevos', 'Sesiones', 'Tasa de interacción', 'Eventos clave', 'Tasa de conversión', 'Inversión'],
         ...g.porMes.map((m) => [u.monthLabel(m.mes), m.usuarios, m.usuariosNuevos, m.sesiones, r2(m.tasaInteraccion), m.eventosClave, r2(m.tasaConversion), r2(m.inversion)]),
@@ -129,7 +129,7 @@ ADI.exportar = (() => {
     }
     if ((s.chat || []).length) add('Consultas al asistente', hoja([['Quién', 'Mensaje', 'Fecha'], ...s.chat.map((m) => [m.rol === 'user' ? 'Pregunta' : (m.modo === 'gemini' ? 'IA (Gemini)' : 'App (modo local)'), texto(m.texto), new Date(m.fecha).toLocaleString('es-PE')])]));
 
-    const nombre = `ADI-MUSIC-AI-resultados-${u.today()}.xlsx`;
+    const nombre = `ADIX-Music-resultados-${u.today()}.xlsx`;
     XLSX.writeFile(wb, nombre);
     ADI.store.log('Resultados exportados a Excel', nombre);
     u.toast(`Se descargó ${nombre}`, 'ok', 5000);
@@ -138,7 +138,7 @@ ADI.exportar = (() => {
   // Imprime la pantalla actual; desde el diálogo se puede "Guardar como PDF".
   function pdf() {
     const head = document.getElementById('print-head');
-    head.innerHTML = `<b>ADI MUSIC AI</b> — ${u.esc(document.getElementById('page-title').textContent)} · ${new Date().toLocaleString('es-PE', { dateStyle: 'long', timeStyle: 'short' })}${ADI.store.get().ga4?.esDemo && location.hash.includes('ga4') ? ' · GA4: datos de demostración' : ''}`;
+    head.innerHTML = `<img src="img/logo-adix-160.jpg" alt="" style="width:28px;height:28px;border-radius:50%;vertical-align:middle;margin-right:8px"><b>ADIX Music Sonidos</b> — ${u.esc(document.getElementById('page-title').textContent)} · ${new Date().toLocaleString('es-PE', { dateStyle: 'long', timeStyle: 'short' })}${ADI.store.get().ga4?.esDemo && location.hash.includes('ga4') ? ' · GA4: datos de demostración' : ''}`;
     document.querySelectorAll('#view details').forEach((d) => { d.open = true; });
     document.body.classList.add('print-page');
     const fin = () => { document.body.classList.remove('print-page'); window.removeEventListener('afterprint', fin); };

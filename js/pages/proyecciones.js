@@ -61,17 +61,17 @@ ADI.pages.proyecciones = (() => {
     ADI.charts.barras(el.querySelector('#p-c1'), {
       labels, moneda: true,
       series: [
-        { label: 'Real', data: [...hist.map((m) => m.ingresos), ...p.meses.map(() => null)], color: '#6D28D9' },
-        { label: 'Optimista', data: fut('optimista'), tipo: 'line', color: '#059669', punteado: true },
-        { label: 'Intermedio', data: fut('intermedio'), tipo: 'line', color: '#F59E0B' },
-        { label: 'Conservador', data: fut('conservador'), tipo: 'line', color: '#DC2626', punteado: true },
+        { label: 'Real', data: [...hist.map((m) => m.ingresos), ...p.meses.map(() => null)], color: ADI.charts.C.negro },
+        { label: 'Optimista', data: fut('optimista'), tipo: 'line', color: ADI.charts.C.verde, punteado: true },
+        { label: 'Intermedio', data: fut('intermedio'), tipo: 'line', color: ADI.charts.C.rojo },
+        { label: 'Conservador', data: fut('conservador'), tipo: 'line', color: ADI.charts.C.ambar, punteado: true },
       ],
     });
     if (R[e].flujo != null) {
       ADI.charts.lineas(el.querySelector('#p-c2'), {
         labels: labFut, moneda: true,
-        series: ADI.proy.ESC.map((x, i) => ({ label: NOM[x], data: p.meses.map((m) => m.escenarios[x].acumulado), color: ['#DC2626', '#F59E0B', '#059669'][i], punteado: x !== 'intermedio' }))
-          .concat([{ label: 'Cero', data: p.meses.map(() => 0), color: '#9ca3af', punteado: true }]),
+        series: ADI.proy.ESC.map((x, i) => ({ label: NOM[x], data: p.meses.map((m) => m.escenarios[x].acumulado), color: [ADI.charts.C.ambar, ADI.charts.C.rojo, ADI.charts.C.verde][i], punteado: x !== 'intermedio' }))
+          .concat([{ label: 'Cero', data: p.meses.map(() => 0), color: ADI.charts.C.gris, punteado: true }]),
       });
     }
   }

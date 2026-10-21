@@ -1,8 +1,10 @@
-/* ADI MUSIC AI — gráficos (Chart.js) con un estilo uniforme. */
+/* ADIX Music AI — gráficos (Chart.js) con un estilo uniforme. */
 ADI.charts = (() => {
   const u = ADI.u;
   const activos = [];
-  const PALETA = ['#6D28D9', '#F59E0B', '#0EA5A4', '#E11D48', '#2563EB', '#84CC16', '#A855F7', '#F97316'];
+  // Colores del logo de ADIX Music Sonidos (rojo, negro) más azul de escenario y tonos de apoyo.
+  const C = { rojo: '#D90F1E', negro: '#1A1A1F', azul: '#2563EB', gris: '#9CA3AF', ambar: '#F59E0B', verde: '#059669', morado: '#7C3AED' };
+  const PALETA = [C.rojo, C.negro, C.azul, C.gris, C.ambar, C.verde, C.morado, '#F97316'];
 
   const css = (v, fb) => getComputedStyle(document.documentElement).getPropertyValue(v).trim() || fb;
 
@@ -82,5 +84,5 @@ ADI.charts = (() => {
     });
   }
 
-  return { barras, lineas, dona, destruirTodos, PALETA };
+  return { barras, lineas, dona, destruirTodos, PALETA, C };
 })();
