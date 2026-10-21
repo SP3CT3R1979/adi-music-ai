@@ -10,6 +10,13 @@ Aplicación web con inteligencia artificial que ayuda a Yilmar a entender los da
 2. En **Inicio** o **Ventas y KPI** pulsa **"Subir Excel"** y elige el archivo de ADI MUSIC. Por privacidad, el Excel del negocio **no está publicado** en este sitio: se carga desde la computadora y se queda solo en ese navegador.
 3. En **Analítica GA4** importa el informe de Google Analytics 4 o usa los **datos de demostración**.
 
+## Exportar resultados
+
+- **Excel** (botón arriba a la derecha): descarga un archivo con todos los resultados en hojas separadas: Resumen, KPI, Ventas por mes, Por paquete, Por lugar, Por tipo de evento, Patrones y decisiones, Proyección, Finanzas, Publicidad, GA4, Cotizaciones, Registros validados, Validación de datos y Consultas al asistente.
+- **PDF** (botón arriba a la derecha): imprime la pantalla que estás viendo, con sus gráficos. En el diálogo de impresión elige **"Guardar como PDF"**.
+- Cada **cotización** se puede imprimir o guardar en PDF desde Cotizaciones.
+- **Respaldo** (Configuración): guarda todos los datos en un archivo para pasarlos a otra computadora.
+
 ## Activar la IA (Google Gemini, gratis)
 
 1. Entra a **https://aistudio.google.com/apikey** con una cuenta de Google.

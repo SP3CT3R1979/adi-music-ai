@@ -66,8 +66,10 @@ ADI.pages.cotizaciones = (() => {
     div.className = 'cot-print';
     div.innerHTML = documento(c, s);
     document.body.appendChild(div);
-    window.print();
-    setTimeout(() => div.remove(), 500);
+    document.body.classList.add('print-cot');
+    const fin = () => { document.body.classList.remove('print-cot'); div.remove(); window.removeEventListener('afterprint', fin); };
+    window.addEventListener('afterprint', fin);
+    setTimeout(() => window.print(), 50);
   }
 
   function editor(el, s) {

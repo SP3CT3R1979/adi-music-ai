@@ -21,6 +21,10 @@ ADI.app = (() => {
     document.getElementById('menu-btn').innerHTML = ui.icon('menu');
     document.getElementById('menu-btn').addEventListener('click', () => document.body.classList.toggle('nav-open'));
     document.getElementById('nav-bg').addEventListener('click', () => document.body.classList.remove('nav-open'));
+    document.getElementById('btn-excel').innerHTML = `${ui.icon('download', 'ico ico-xs')}<span>Excel</span>`;
+    document.getElementById('btn-excel').addEventListener('click', () => ADI.exportar.excel());
+    document.getElementById('btn-pdf').innerHTML = `${ui.icon('print', 'ico ico-xs')}<span>PDF</span>`;
+    document.getElementById('btn-pdf').addEventListener('click', () => ADI.exportar.pdf());
     document.getElementById('lock-btn').innerHTML = ui.icon('lock');
     document.getElementById('lock-btn').addEventListener('click', bloquear);
   }

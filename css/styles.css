@@ -200,13 +200,29 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary-sof
 .lock-box .brand { color: var(--text); justify-content: center; padding: 0 0 6px; }
 .lock-err { color: var(--bad); min-height: 1.2em; margin: 0; }
 
-/* ---------- Cotización imprimible ---------- */
-.cot-print { display: none; }
+/* ---------- Impresión / PDF ---------- */
+.cot-print, .print-head { display: none; }
+.top-btn { padding: 6px 10px; }
 @media print {
-  body * { visibility: hidden; }
-  .cot-print, .cot-print * { visibility: visible; }
-  .cot-print { display: block; position: absolute; inset: 0; padding: 24px; font-size: 13px; }
-  .modal-bg { background: none; position: static; }
+  @page { size: A4; margin: 12mm; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* Cotización: solo el documento */
+  body.print-cot * { visibility: hidden; }
+  body.print-cot .cot-print, body.print-cot .cot-print * { visibility: visible; }
+  body.print-cot .cot-print { display: block; position: absolute; inset: 0; padding: 24px; font-size: 13px; }
+  /* Pantalla actual */
+  body.print-page { background: #fff; font-size: 12px; }
+  body.print-page .sidebar, body.print-page .topbar, body.print-page .nav-bg, body.print-page #toasts, body.print-page .modal-bg,
+  body.print-page .chips, body.print-page .chat-form, body.print-page .card-a, body.print-page button, body.print-page #lock { display: none !important; }
+  body.print-page .app, body.print-page .main { display: block; }
+  body.print-page .view { padding: 0; max-width: none; }
+  body.print-page .print-head { display: block; font-size: 12px; color: #444; border-bottom: 1px solid #ccc; padding-bottom: 6px; margin-bottom: 12px; }
+  body.print-page .card, body.print-page .kpi, body.print-page .kpi-d, body.print-page .insights li { box-shadow: none; break-inside: avoid; }
+  body.print-page .chart { height: auto !important; }
+  body.print-page canvas { max-width: 100% !important; height: auto !important; }
+  body.print-page .chat { height: auto; }
+  body.print-page .chat-log { overflow: visible; }
+  body.print-page .table-wrap { overflow: visible; }
 }
 .cot-doc h2 { font-size: 20px; margin-bottom: 4px; }
 .cot-doc table { width: 100%; border-collapse: collapse; margin: 12px 0; }
@@ -225,6 +241,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary-sof
   .only-mobile { display: inline-flex; }
   .topbar { padding: 10px 16px; flex-wrap: wrap; gap: 8px; }
   .topbar h1 { font-size: 18px; }
+  .top-btn span { display: none; }
   .status-row { width: 100%; justify-content: flex-start; order: 3; }
   .view { padding: 16px 16px 48px; }
   .g2, .g3 { grid-template-columns: minmax(0, 1fr); }
