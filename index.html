@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADI MUSIC AI</title>
+  <meta name="description" content="Aplicación inteligente para la gestión empresarial de ADI MUSIC: analítica GA4, KPI, proyecciones, finanzas, cotizaciones y asistente con IA.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%236D28D9'/%3E%3Cpath d='M9 17V7l8-1.5v9' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='7' cy='17' r='2' fill='white'/%3E%3Ccircle cx='15' cy='15.5' r='2' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="lock" class="lock" hidden></div>
+
+  <div class="app">
+    <aside class="sidebar" aria-label="Menú principal">
+      <div class="brand">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+        <span>ADI MUSIC <b>AI</b></span>
+      </div>
+      <nav id="nav"></nav>
+      <div class="side-foot">Gestión inteligente para ADI MUSIC · Cusco</div>
+    </aside>
+    <div id="nav-bg" class="nav-bg"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <button id="menu-btn" class="icon-btn only-mobile" aria-label="Abrir menú"></button>
+        <h1 id="page-title">Inicio</h1>
+        <div id="status" class="status-row"></div>
+        <button id="lock-btn" class="icon-btn" title="Bloquear" aria-label="Bloquear" hidden></button>
+      </header>
+      <main id="view" class="view"></main>
+    </div>
+  </div>
+
+  <!-- Librerías (incluidas localmente para funcionar sin internet) -->
+  <script src="js/vendor/xlsx.full.min.js"></script>
+  <script src="js/vendor/chart.umd.min.js"></script>
+  <!-- Datos incluidos: Excel de ADI MUSIC y GA4 de demostración -->
+  <script src="datos/datos-incluidos.js"></script>
+  <!-- Núcleo -->
+  <script src="js/core/util.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/excel.js"></script>
+  <script src="js/core/kpi.js"></script>
+  <script src="js/core/finanzas.js"></script>
+  <script src="js/core/proyeccion.js"></script>
+  <script src="js/core/ga4.js"></script>
+  <script src="js/core/publicidad.js"></script>
+  <script src="js/core/ia.js"></script>
+  <script src="js/core/charts.js"></script>
+  <script src="js/core/ui.js"></script>
+  <script src="js/app.js"></script>
+  <!-- Pantallas -->
+  <script src="js/pages/inicio.js"></script>
+  <script src="js/pages/ga4.js"></script>
+  <script src="js/pages/ventas.js"></script>
+  <script src="js/pages/proyecciones.js"></script>
+  <script src="js/pages/publicidad.js"></script>
+  <script src="js/pages/finanzas.js"></script>
+  <script src="js/pages/cotizaciones.js"></script>
+  <script src="js/pages/asistente.js"></script>
+  <script src="js/pages/configuracion.js"></script>
+</body>
+</html>
