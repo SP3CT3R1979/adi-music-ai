@@ -127,7 +127,7 @@ ADI.exportar = (() => {
       const val = s.ventas.validacion;
       if (val) add('Validación de datos', hoja([['Tipo', 'Detalle'], ...val.errores.map((x) => ['Error', x]), ...val.advertencias.map((x) => ['Advertencia', x]), ...val.info.map((x) => ['Observación', x])]));
     }
-    if ((s.chat || []).length) add('Consultas al asistente', hoja([['Quién', 'Mensaje', 'Fecha'], ...s.chat.map((m) => [m.rol === 'user' ? 'Pregunta' : (m.modo === 'gemini' ? 'IA (Gemini)' : 'App (modo local)'), texto(m.texto), new Date(m.fecha).toLocaleString('es-PE')])]));
+    if ((s.chat || []).length) add('Consultas al asistente', hoja([['Quién', 'Mensaje', 'Fecha'], ...s.chat.map((m) => [m.rol === 'user' ? 'Pregunta' : (m.modo === 'claude' ? 'IA (Claude)' : m.modo === 'gemini' ? 'IA (Gemini)' : 'App (modo local)'), texto(m.texto), new Date(m.fecha).toLocaleString('es-PE')])]));
 
     const nombre = `ADIX-Music-resultados-${u.today()}.xlsx`;
     XLSX.writeFile(wb, nombre);

@@ -6,21 +6,22 @@ ADI.pages.configuracion = (() => {
   function render(el) {
     const s = ADI.store.get();
     const c = s.config, n = s.negocio;
-    const modelos = c.modelosDisponibles || [];
     el.innerHTML = `<div class="stack">
       <div class="grid g2">
-        ${ui.card('Inteligencia artificial (Google Gemini)', `
+        ${ui.card('Inteligencia artificial (Claude, de Anthropic)', `
           <ol class="list small" style="margin-bottom:12px">
-            <li>Entra a <b>aistudio.google.com/apikey</b> con una cuenta de Google.</li>
-            <li>Pulsa <b>Create API key</b> (es gratuita, con límites de uso).</li>
-            <li>Copia la clave, pégala aquí y pulsa <b>Probar conexión</b>.</li>
+            <li>Entra a <b>platform.claude.com</b> e inicia sesión.</li>
+            <li>Ve a <b>API Keys → Create Key</b> y copia la clave (empieza con <code>sk-ant-</code>).</li>
+            <li>La API es de pago por uso: la cuenta necesita créditos en <b>Billing</b>.</li>
+            <li>Pega la clave aquí y pulsa <b>Guardar y probar conexión</b>.</li>
           </ol>
           <form id="cf-ia" class="form">
-            <label class="full">Clave de API de Gemini<input type="password" name="key" value="${u.esc(c.geminiKey)}" placeholder="Pega aquí tu clave" autocomplete="off"></label>
-            <label class="full">Modelo<select name="modelo"><option value="auto">Automático (el mejor Flash disponible${c.modeloDetectado ? ': ' + u.esc(c.modeloDetectado) : ''})</option>${modelos.map((m) => `<option ${m === c.geminiModelo ? 'selected' : ''}>${u.esc(m)}</option>`).join('')}</select></label>
-            <div class="row full"><button class="btn btn-primary" type="submit">Guardar y probar conexión</button>${c.geminiKey ? '<button class="btn btn-danger" type="button" id="cf-ia-del">Quitar clave</button>' : ''}</div>
+            <label class="full">Clave de API de Claude<input type="password" name="key" value="${u.esc(c.claudeKey)}" placeholder="sk-ant-…" autocomplete="off"></label>
+            <label class="full">Modelo<select name="modelo">${ADI.ia.MODELOS.map((m) => `<option value="${m.id}" ${m.id === ADI.ia.modeloActual() ? 'selected' : ''}>${u.esc(m.nombre)}</option>`).join('')}</select></label>
+            <div class="row full"><button class="btn btn-primary" type="submit">Guardar y probar conexión</button>${c.claudeKey ? '<button class="btn btn-danger" type="button" id="cf-ia-del">Quitar clave</button>' : ''}</div>
           </form>
-          <p class="muted small" style="margin-top:10px">La clave se guarda solo en este navegador. Al preguntar, la app envía a Gemini un <b>resumen</b> de los datos (totales, KPI, meses), no el archivo completo. Sin clave, el asistente funciona en modo local.</p>
+          <p class="muted small" style="margin-top:10px">Al preguntar, la app envía a Claude un <b>resumen</b> de los datos (totales, KPI, meses), no el archivo completo. Cada pregunta cuesta unos centavos de dólar; las siguientes salen más baratas porque los datos quedan en caché unos minutos. Sin clave, el asistente funciona en modo local.</p>
+          <p class="muted small">⚠ La clave queda guardada en este navegador y la app la usa directamente desde aquí (no hay servidor intermedio). Úsala solo en computadoras de confianza, ponle un límite de gasto en la consola y quítala al terminar si la computadora no es tuya.</p>
           <div id="cf-ia-res"></div>`)}
         ${ui.card('Seguridad', `
           <p class="muted small">Protege el acceso con un PIN. Se pedirá al abrir la aplicación en este navegador.</p>
@@ -49,7 +50,7 @@ ADI.pages.configuracion = (() => {
         </tbody></table></div><div class="row" style="margin-top:10px"><button class="btn btn-sm" id="cf-paq-add">+ Agregar paquete</button></div>`, { sub: 'Se usan para estimar costos, márgenes y cotizaciones.' })}
 
       <div class="grid g2">
-        ${ui.card('Respaldo de datos', `<p class="muted small">Descarga una copia de todos los datos (ventas, GA4, finanzas, cotizaciones y conversación). No incluye la clave de Gemini ni el PIN.</p>
+        ${ui.card('Respaldo de datos', `<p class="muted small">Descarga una copia de todos los datos (ventas, GA4, finanzas, cotizaciones y conversación). No incluye la clave de Claude ni el PIN.</p>
           <div class="row"><button class="btn" id="cf-exp">${ui.icon('download')} Descargar respaldo</button><button class="btn" id="cf-imp">${ui.icon('upload')} Restaurar respaldo</button><button class="btn btn-danger" id="cf-reset">${ui.icon('trash')} Borrar todos los datos</button></div>`)}
         ${ui.card('Historial de análisis y consultas', ui.tabla(['Fecha', 'Acción', 'Detalle'], s.historial.slice(0, 40).map((h) => [new Date(h.fecha).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' }), u.esc(h.accion), `<span class="small">${u.esc(h.detalle)}</span>`]), { vacioTxt: 'Todavía no hay actividad registrada.' }))}
       </div>
@@ -60,22 +61,22 @@ ADI.pages.configuracion = (() => {
       e.preventDefault();
       const fd = new FormData(e.target);
       const key = String(fd.get('key') || '').trim();
-      ADI.store.update((x) => { if (x.config.geminiKey !== key) { x.config.modeloDetectado = ''; x.config.modelosDisponibles = []; } x.config.geminiKey = key; x.config.geminiModelo = fd.get('modelo') || 'auto'; });
+      ADI.store.update((x) => { x.config.claudeKey = key; x.config.claudeModelo = fd.get('modelo') || ADI.ia.MODELO_DEFECTO; });
       const res = el.querySelector('#cf-ia-res');
       if (!key) { res.innerHTML = ''; ADI.app.estadoDatos(); return; }
-      res.innerHTML = '<p class="dots muted" style="margin-top:10px">Probando conexión con Gemini</p>';
+      res.innerHTML = '<p class="dots muted" style="margin-top:10px">Probando conexión con Claude</p>';
       try {
         const m = await ADI.ia.probarConexion();
-        ADI.store.log('Gemini conectado', m);
+        ADI.store.log('Claude conectado', m);
         render(el);
-        el.querySelector('#cf-ia-res').innerHTML = ui.banner('ok', `Conexión correcta. Modelo elegido: <b>${u.esc(m)}</b>.`);
+        el.querySelector('#cf-ia-res').innerHTML = ui.banner('ok', `Conexión correcta con Claude. Modelo: <b>${u.esc(m)}</b>. Ya puedes preguntar en el Asistente IA.`);
       } catch (err) {
         res.innerHTML = ui.banner('error', u.esc(err.message));
       }
       ADI.app.estadoDatos();
     };
     const iaDel = el.querySelector('#cf-ia-del');
-    if (iaDel) iaDel.onclick = () => { ADI.store.update((x) => { x.config.geminiKey = ''; x.config.modeloDetectado = ''; x.config.modelosDisponibles = []; x.config.geminiModelo = 'auto'; }); render(el); ADI.app.estadoDatos(); };
+    if (iaDel) iaDel.onclick = () => { ADI.store.update((x) => { x.config.claudeKey = ''; }); render(el); ADI.app.estadoDatos(); };
 
     // PIN
     el.querySelector('#cf-pin').onsubmit = async (e) => {
@@ -120,7 +121,7 @@ ADI.pages.configuracion = (() => {
     // Respaldo
     el.querySelector('#cf-exp').onclick = () => {
       const copia = JSON.parse(JSON.stringify(ADI.store.get()));
-      copia.config = { ...copia.config, geminiKey: '', pinHash: '' };
+      copia.config = { ...copia.config, claudeKey: '', pinHash: '' };
       u.download(`respaldo-adi-music-ai-${u.today()}.json`, JSON.stringify(copia, null, 1));
       ADI.store.log('Respaldo descargado');
     };
@@ -132,7 +133,7 @@ ADI.pages.configuracion = (() => {
           if (!data || typeof data !== 'object' || !('negocio' in data)) throw new Error('El archivo no es un respaldo de ADIX Music AI.');
           if (!confirm('Se reemplazarán los datos actuales por los del respaldo. ¿Continuar?')) return;
           const cfg = ADI.store.get().config;
-          ADI.store.replaceAll({ ...data, config: { ...data.config, geminiKey: cfg.geminiKey, pinHash: cfg.pinHash } });
+          ADI.store.replaceAll({ ...data, config: { ...data.config, claudeKey: cfg.claudeKey, pinHash: cfg.pinHash } });
           ADI.store.log('Respaldo restaurado', inp.files[0].name);
           u.toast('Respaldo restaurado.', 'ok'); ADI.app.render();
         } catch (err) { u.toast(err.message || 'No se pudo leer el respaldo.', 'error'); }
@@ -140,7 +141,7 @@ ADI.pages.configuracion = (() => {
       inp.click();
     };
     el.querySelector('#cf-reset').onclick = () => {
-      if (!confirm('Se borrarán ventas, GA4, finanzas, cotizaciones, conversación e historial de este navegador. La clave de Gemini y el PIN se conservan. ¿Continuar?')) return;
+      if (!confirm('Se borrarán ventas, GA4, finanzas, cotizaciones, conversación e historial de este navegador. La clave de Claude y el PIN se conservan. ¿Continuar?')) return;
       ADI.store.reset(true);
       u.toast('Datos borrados.', 'ok'); location.hash = '#/inicio'; ADI.app.render();
     };

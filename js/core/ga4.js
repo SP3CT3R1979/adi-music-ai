@@ -105,7 +105,7 @@ ADI.ga4 = (() => {
     return { ...desdeFilas(filas, file.name), tipo: ext.toUpperCase() };
   }
 
-  // PDF: se envía a Gemini para extraer las tablas en un formato estructurado.
+  // PDF: se envía a Claude para extraer las tablas en un formato estructurado.
   async function importarPDF(file) {
     const b64 = await u.readAsBase64(file);
     const json = await ADI.ia.extraerGA4dePDF(b64);

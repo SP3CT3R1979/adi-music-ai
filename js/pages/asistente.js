@@ -2,6 +2,7 @@
 ADI.pages.asistente = (() => {
   const u = ADI.u, ui = ADI.ui;
   let ocupado = false;
+  let parcial = ''; // texto que va llegando de Claude mientras responde
 
   const SUGERIDAS = [
     '¿Cómo está mi negocio en resumen?',
@@ -15,7 +16,7 @@ ADI.pages.asistente = (() => {
 
   function burbuja(m) {
     const meta = m.rol === 'user' ? u.esc(new Date(m.fecha).toLocaleTimeString('es-PE', { timeStyle: 'short' }))
-      : `${m.modo === 'gemini' ? `Gemini · ${u.esc(m.modelo || '')}` : 'Modo local (sin IA)'} · ${new Date(m.fecha).toLocaleTimeString('es-PE', { timeStyle: 'short' })}`;
+      : `${m.modo === 'claude' ? `Claude · ${u.esc(m.modelo || '')}` : m.modo === 'gemini' ? `Gemini · ${u.esc(m.modelo || '')}` : 'Modo local (sin IA)'} · ${new Date(m.fecha).toLocaleTimeString('es-PE', { timeStyle: 'short' })}`;
     return `<div class="msg ${m.rol === 'user' ? 'user' : 'model'}">${m.rol === 'user' ? `<p>${u.esc(m.texto)}</p>` : u.md(m.texto)}<div class="meta">${meta}</div></div>`;
   }
 
@@ -23,7 +24,7 @@ ADI.pages.asistente = (() => {
     const s = ADI.store.get();
     const log = el.querySelector('#chat-log');
     log.innerHTML = s.chat.length ? s.chat.map(burbuja).join('') : `<div class="msg model"><p>¡Hola! Soy el asistente de <b>ADIX Music AI</b>. Puedo explicarte tus ventas, tus finanzas, las proyecciones y los resultados de GA4 con palabras sencillas, y ayudarte a evaluar decisiones.</p><p>Siempre te mostraré las cifras en las que me baso y te diré cuando falten datos.</p></div>`;
-    if (ocupado) log.insertAdjacentHTML('beforeend', '<div class="msg model pensando"><span class="dots">Analizando tus datos</span></div>');
+    if (ocupado) log.insertAdjacentHTML('beforeend', parcial ? `<div class="msg model" id="msg-stream">${u.md(parcial)}</div>` : '<div class="msg model pensando" id="msg-stream"><span class="dots">Analizando tus datos</span></div>');
     log.scrollTop = log.scrollHeight;
   }
 
@@ -36,10 +37,15 @@ ADI.pages.asistente = (() => {
     let resp;
     if (ADI.ia.disponible()) {
       try {
-        const r = await ADI.ia.preguntar(q, previo);
-        resp = { rol: 'model', texto: r.texto, modo: 'gemini', modelo: r.modelo };
+        parcial = '';
+        const r = await ADI.ia.preguntar(q, previo, (t) => {
+          parcial = t;
+          const box = el.querySelector('#msg-stream');
+          if (box) { box.className = 'msg model'; box.innerHTML = u.md(t); const log = el.querySelector('#chat-log'); log.scrollTop = log.scrollHeight; }
+        });
+        resp = { rol: 'model', texto: r.texto, modo: 'claude', modelo: r.modelo };
       } catch (e) {
-        resp = { rol: 'model', texto: `⚠ *No se pudo usar Gemini: ${e.message}* Respuesta calculada por la app:\n\n${ADI.ia.respuestaLocal(q)}`, modo: 'local' };
+        resp = { rol: 'model', texto: `⚠ *No se pudo usar Claude: ${e.message}* Respuesta calculada por la app:\n\n${ADI.ia.respuestaLocal(q)}`, modo: 'local' };
       }
     } else {
       resp = { rol: 'model', texto: ADI.ia.respuestaLocal(q), modo: 'local' };
@@ -47,7 +53,7 @@ ADI.pages.asistente = (() => {
     resp.fecha = new Date().toISOString();
     ADI.store.update((s) => { s.chat.push(resp); s.chat = s.chat.slice(-60); });
     ADI.store.log('Consulta al asistente', q);
-    ocupado = false;
+    ocupado = false; parcial = '';
     if (document.body.contains(el)) pintarLog(el);
   }
 
@@ -63,8 +69,8 @@ ADI.pages.asistente = (() => {
 
     el.innerHTML = `<div class="chat">
       ${ui.banner(conIA ? 'ok' : 'info', conIA
-        ? `<b>Asistente conectado a Google Gemini</b>${ADI.ia.modeloActual() ? ` (${u.esc(ADI.ia.modeloActual())})` : ''}. La IA recibe un resumen de: ${u.esc(datos)}.`
-        : `<b>Modo local:</b> las respuestas las calcula la app sin IA. Para respuestas más completas, agrega tu clave gratuita de Gemini en <a href="#/configuracion">Configuración</a>. Datos disponibles: ${u.esc(datos)}.`)}
+        ? `<b>Asistente conectado a Claude</b> (${u.esc(ADI.ia.modeloActual())}). La IA recibe un resumen de: ${u.esc(datos)}.`
+        : `<b>Modo local:</b> las respuestas las calcula la app sin IA. Para respuestas más completas, agrega tu clave de API de Claude en <a href="#/configuracion">Configuración</a>. Datos disponibles: ${u.esc(datos)}.`)}
       <div id="chat-log" class="chat-log" aria-live="polite" style="margin-top:12px"></div>
       ${ui.preguntas(SUGERIDAS)}
       <form class="chat-form" id="chat-form">

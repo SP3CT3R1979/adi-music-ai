@@ -1,94 +1,89 @@
-/* ADIX Music AI — asistente con inteligencia artificial (Google Gemini) y respuestas locales de respaldo. */
+/* ADIX Music AI — asistente con inteligencia artificial (Claude, de Anthropic) y respuestas locales de respaldo. */
 ADI.ia = (() => {
   const u = ADI.u;
-  const API = 'https://generativelanguage.googleapis.com/v1beta';
+  const MODELOS = [
+    { id: 'claude-opus-5-5', nombre: 'Claude Opus 5.5 — el más capaz (recomendado)' },
+    { id: 'claude-sonnet-5-5', nombre: 'Claude Sonnet 5.5 — más económico' },
+    { id: 'claude-haiku-5-5', nombre: 'Claude Haiku 5.5 — el más económico y rápido' },
+  ];
+  const MODELO_DEFECTO = 'claude-opus-5-5';
 
-  // ---------- Conexión con Gemini ----------
-  function errorAmigable(status, body) {
-    const msg = (body && body.error && body.error.message) || '';
-    if (status === 400 && /api key/i.test(msg)) return 'La clave de Gemini no es válida. Revísala en Configuración.';
-    if (status === 400) return 'Gemini rechazó la solicitud: ' + msg;
-    if (status === 403) return 'La clave no tiene permiso para usar Gemini (revisa que la API esté habilitada en Google AI Studio).';
-    if (status === 404) return 'El modelo de Gemini elegido ya no está disponible.';
-    if (status === 429) return 'Se alcanzó el límite gratuito de Gemini por ahora. Espera un minuto e intenta de nuevo.';
-    if (status >= 500) return 'Gemini no está disponible en este momento. Intenta en unos segundos.';
-    return 'Error de Gemini (' + status + '): ' + msg;
+  // ---------- Conexión con Claude (SDK oficial de Anthropic) ----------
+  const disponible = () => !!ADI.store.get().config.claudeKey;
+  const modeloActual = () => ADI.store.get().config.claudeModelo || MODELO_DEFECTO;
+
+  function cliente() {
+    const key = ADI.store.get().config.claudeKey;
+    if (!key) throw new Error('No hay clave de API de Claude configurada.');
+    if (!window.Anthropic) throw new Error('No se cargó el SDK de Anthropic.');
+    // La app no tiene servidor propio: la llamada sale directamente del navegador con la clave del usuario.
+    return new Anthropic({ apiKey: key, dangerouslyAllowBrowser: true, maxRetries: 2, timeout: 120000 });
   }
 
-  async function pedir(url, opciones = {}, ms = 90000) {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), ms);
-    try {
-      const r = await fetch(url, { ...opciones, signal: ctrl.signal });
-      let body = null;
-      try { body = await r.json(); } catch (_) { /* sin cuerpo JSON */ }
-      if (!r.ok) { const e = new Error(errorAmigable(r.status, body)); e.status = r.status; throw e; }
-      return body;
-    } catch (e) {
-      if (e.name === 'AbortError') throw new Error('Gemini tardó demasiado en responder. Intenta de nuevo.');
-      if (e instanceof TypeError) throw new Error('No hay conexión con Gemini (revisa tu internet).');
-      throw e;
-    } finally { clearTimeout(t); }
-  }
-
-  // Elige el mejor modelo "Flash" disponible para la clave (los nombres de modelos cambian seguido).
-  function puntuarModelo(m) {
-    const n = m.name.replace('models/', '');
-    if (!/gemini/.test(n) || !(m.supportedGenerationMethods || []).includes('generateContent')) return -1;
-    if (/(image|tts|audio|live|embedding|vision|robotics|computer|aqa|learnlm|native)/.test(n)) return -1;
-    let s = 0;
-    if (/flash-lite/.test(n)) s += 60; else if (/flash/.test(n)) s += 100; else if (/pro/.test(n)) s += 40;
-    if (!/(preview|exp)/.test(n)) s += 20;
-    const v = n.match(/gemini-(\d+(?:\.\d+)?)/);
-    if (v) s += parseFloat(v[1]) * 10; else if (/latest/.test(n)) s += 15;
-    return s;
-  }
-
-  async function listarModelos(key) {
-    let token = '', todos = [];
-    for (let i = 0; i < 4; i++) {
-      const data = await pedir(`${API}/models?pageSize=200${token ? '&pageToken=' + token : ''}`, { headers: { 'x-goog-api-key': key } }, 20000);
-      todos = todos.concat(data.models || []);
-      token = data.nextPageToken; if (!token) break;
+  function errorAmigable(e) {
+    const A = window.Anthropic;
+    if (!A || !(e instanceof A.AnthropicError)) return e.message || String(e);
+    if (e instanceof A.AuthenticationError) return 'La clave de API de Claude no es válida. Revísala en Configuración.';
+    if (e instanceof A.PermissionDeniedError) return 'La clave no tiene permiso para usar este modelo de Claude.';
+    if (e instanceof A.NotFoundError) return 'El modelo elegido no está disponible para tu cuenta. Prueba con otro en Configuración.';
+    if (e instanceof A.RateLimitError) return 'Se alcanzó el límite de uso de Claude por ahora. Espera un minuto e intenta de nuevo.';
+    if (e instanceof A.BadRequestError) {
+      if (/credit balance/i.test(e.message)) return 'Tu cuenta de Claude no tiene saldo. Recarga créditos en platform.claude.com (Billing).';
+      return 'Claude rechazó la solicitud: ' + e.message;
     }
-    return todos.map((m) => ({ id: m.name.replace('models/', ''), nombre: m.displayName || m.name, score: puntuarModelo(m) }))
-      .filter((m) => m.score >= 0).sort((a, b) => b.score - a.score);
+    if (e instanceof A.InternalServerError) return 'Claude está ocupado en este momento. Intenta de nuevo en unos segundos.';
+    if (e instanceof A.APIConnectionError) return 'No hay conexión con Claude (revisa tu internet).';
+    if (e instanceof A.APIError) {
+      if (e.status === 402 || e.type === 'billing_error') return 'Tu cuenta de Claude no tiene saldo. Recarga créditos en platform.claude.com (Billing).';
+      return `Error de Claude (${e.status ?? 'sin código'}): ${e.message}`;
+    }
+    return e.message || String(e);
   }
 
+  // Parámetros comunes. En Opus 5.5 y Sonnet 5.5 se activa el respaldo automático del servidor:
+  // si el modelo rechaza una pregunta por seguridad, la API la reintenta con otro modelo adecuado.
+  function parametros(modelo, extra) {
+    const p = { model: modelo, max_tokens: 64000, output_config: { effort: 'medium' }, ...extra };
+    if (/opus|sonnet/.test(modelo)) { p.betas = ['server-side-fallback-2026-07-01']; p.fallbacks = 'default'; }
+    return p;
+  }
+  const sinRespaldo = (p) => { const q = { ...p }; delete q.betas; delete q.fallbacks; return q; };
+
+  // Verifica la clave y el modelo sin generar texto (no consume tokens).
   async function probarConexion() {
-    const cfg = ADI.store.get().config;
-    if (!cfg.geminiKey) throw new Error('Primero pega tu clave de Gemini.');
-    const modelos = await listarModelos(cfg.geminiKey);
-    if (!modelos.length) throw new Error('La clave funciona, pero no hay modelos de texto disponibles.');
-    ADI.store.update((s) => { s.config.modelosDisponibles = modelos.slice(0, 25).map((m) => m.id); s.config.modeloDetectado = modelos[0].id; });
-    return modelos[0].id;
+    try {
+      const m = await cliente().models.retrieve(modeloActual());
+      return m.display_name || m.id;
+    } catch (e) { throw new Error(errorAmigable(e)); }
   }
 
-  const disponible = () => !!ADI.store.get().config.geminiKey;
-  const modeloActual = () => { const c = ADI.store.get().config; return c.geminiModelo && c.geminiModelo !== 'auto' ? c.geminiModelo : c.modeloDetectado; };
-
-  async function generar({ system, contents, json = false, maxTokens = 2048, temperatura = 0.4 }) {
-    const cfg = ADI.store.get().config;
-    if (!cfg.geminiKey) throw new Error('No hay clave de Gemini configurada.');
-    let modelo = modeloActual();
-    if (!modelo) modelo = await probarConexion();
-    const body = { contents, generationConfig: { temperature: temperatura, maxOutputTokens: maxTokens } };
-    if (system) body.systemInstruction = { parts: [{ text: system }] };
-    if (json) body.generationConfig.responseMimeType = 'application/json';
-    const llamar = (m) => pedir(`${API}/models/${encodeURIComponent(m)}:generateContent`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': cfg.geminiKey }, body: JSON.stringify(body),
-    });
-    let data;
-    try { data = await llamar(modelo); } catch (e) {
-      if (e.status !== 404) throw e;
-      modelo = await probarConexion(); // el modelo guardado ya no existe: se busca otro
-      data = await llamar(modelo);
+  // Envía la conversación a Claude en modo streaming; onTexto recibe el texto acumulado mientras llega.
+  async function generar(params, onTexto) {
+    const c = cliente();
+    const ejecutar = async (p) => {
+      const stream = c.beta.messages.stream(p);
+      let texto = '';
+      for await (const ev of stream) {
+        if (ev.type === 'content_block_delta' && ev.delta.type === 'text_delta') {
+          texto += ev.delta.text;
+          if (onTexto) onTexto(texto);
+        }
+      }
+      return stream.finalMessage();
+    };
+    let msg;
+    try {
+      msg = await ejecutar(params);
+    } catch (e) {
+      // Si la solicitud es rechazada (por ejemplo, la cuenta no admite el respaldo automático), se repite sin él.
+      if (params.fallbacks && window.Anthropic && e instanceof Anthropic.BadRequestError && !/credit balance/i.test(e.message)) {
+        try { msg = await ejecutar(sinRespaldo(params)); } catch (e2) { throw new Error(errorAmigable(e2)); }
+      } else throw new Error(errorAmigable(e));
     }
-    const cand = data.candidates && data.candidates[0];
-    if (!cand) throw new Error(data.promptFeedback?.blockReason ? 'Gemini bloqueó la pregunta (' + data.promptFeedback.blockReason + ').' : 'Gemini no devolvió respuesta.');
-    const texto = (cand.content?.parts || []).filter((p) => !p.thought && p.text).map((p) => p.text).join('').trim();
-    if (!texto) throw new Error(cand.finishReason === 'MAX_TOKENS' ? 'La respuesta fue demasiado larga; intenta una pregunta más concreta.' : 'Gemini devolvió una respuesta vacía.');
-    return { texto, modelo };
+    if (msg.stop_reason === 'refusal') throw new Error('Claude no puede responder esa pregunta. Prueba formulándola de otra manera.');
+    const texto = msg.content.filter((b) => b.type === 'text').map((b) => b.text).join('').trim();
+    if (!texto) throw new Error(msg.stop_reason === 'max_tokens' ? 'La respuesta fue demasiado larga; intenta una pregunta más concreta.' : 'Claude devolvió una respuesta vacía.');
+    return { texto, modelo: msg.model };
   }
 
   // ---------- Contexto con los datos del negocio ----------
@@ -173,19 +168,27 @@ Reglas obligatorias:
 11. Sé breve y claro: máximo unas 250 palabras salvo que pidan más detalle. Usa listas cortas y negritas; evita tablas grandes.
 12. Habla solo del negocio y sus datos. Si preguntan otra cosa, redirige con amabilidad.`;
 
-  async function preguntar(pregunta, historial = []) {
+  async function preguntar(pregunta, historial = [], onTexto) {
     const state = ADI.store.get();
-    const system = REGLAS + '\n\nDATOS (JSON):\n' + JSON.stringify(contexto(state));
-    const contents = historial.slice(-10).map((m) => ({ role: m.rol === 'user' ? 'user' : 'model', parts: [{ text: m.texto }] }));
-    contents.push({ role: 'user', parts: [{ text: pregunta }] });
-    return generar({ system, contents, maxTokens: 8192 });
+    // Reglas + datos van en el system prompt, marcado para caché: las preguntas siguientes lo reutilizan y cuestan menos.
+    const system = [{ type: 'text', text: REGLAS + '\n\nDATOS (JSON):\n' + JSON.stringify(contexto(state)), cache_control: { type: 'ephemeral' } }];
+    const previos = historial.slice(-10).map((m) => ({ role: m.rol === 'user' ? 'user' : 'assistant', content: m.texto }));
+    while (previos.length && previos[0].role !== 'user') previos.shift(); // la conversación debe empezar con el usuario
+    const messages = [...previos, { role: 'user', content: pregunta }];
+    return generar(parametros(modeloActual(), { system, messages }), onTexto);
   }
 
   async function extraerGA4dePDF(base64) {
-    if (!disponible()) throw new Error('Para leer un PDF de GA4 se necesita la IA. Configura tu clave de Gemini o exporta el informe como CSV.');
+    if (!disponible()) throw new Error('Para leer un PDF de GA4 se necesita la IA. Configura tu clave de Claude o exporta el informe como CSV.');
     const prompt = 'Extrae las métricas de las tablas de este informe de Google Analytics 4. Devuelve SOLO JSON con esta forma: {"filas":[{"mes":"AAAA-MM o null","canal":"","fuente":"","campana":"","usuarios":0,"usuariosNuevos":0,"sesiones":0,"sesionesInteraccion":0,"vistas":0,"eventosClave":0,"ingresos":0,"inversion":0}],"notas":"periodo del informe y cualquier aclaración"}. Usa una fila por cada combinación de mes/canal/campaña que aparezca. Si un valor no aparece, pon 0. No sumes filas de totales y no inventes datos.';
-    const { texto } = await generar({ contents: [{ role: 'user', parts: [{ inlineData: { mimeType: 'application/pdf', data: base64 } }, { text: prompt }] }], json: true, maxTokens: 8192, temperatura: 0 });
-    try { return JSON.parse(texto.replace(/^```(json)?/i, '').replace(/```$/, '').trim()); } catch (_) { throw new Error('La IA no devolvió datos legibles del PDF. Prueba con el CSV del informe.'); }
+    const { texto } = await generar(parametros(modeloActual(), {
+      messages: [{ role: 'user', content: [
+        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+        { type: 'text', text: prompt },
+      ] }],
+    }));
+    const json = texto.slice(texto.indexOf('{'), texto.lastIndexOf('}') + 1);
+    try { return JSON.parse(json); } catch (_) { throw new Error('La IA no devolvió datos legibles del PDF. Prueba con el CSV del informe.'); }
   }
 
   // ---------- Respuestas locales (sin IA), para cuando no hay clave o no hay internet ----------
@@ -342,5 +345,5 @@ Reglas obligatorias:
     return out.join('\n');
   }
 
-  return { disponible, probarConexion, listarModelos, generar, preguntar, extraerGA4dePDF, contexto, respuestaLocal, modeloActual };
+  return { disponible, probarConexion, preguntar, extraerGA4dePDF, contexto, respuestaLocal, modeloActual, MODELOS, MODELO_DEFECTO };
 })();
