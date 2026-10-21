@@ -12,6 +12,7 @@ Aplicación web con inteligencia artificial que ayuda a Yilmar a entender los da
 
 ## Exportar resultados
 
+- **WhatsApp** (botón verde arriba a la derecha): arma **un solo mensaje** con el panorama del negocio: ventas, rentabilidad, dinero, proyección de 3 meses, redes y web (GA4), publicidad, qué hacer y qué falta registrar, con cada KPI explicado en palabras simples. Se puede editar antes de enviar y abre WhatsApp (en el celular o en WhatsApp Web) con el mensaje listo. Si escribes un número (por ejemplo 987654321), se abre directo ese chat; si no, eliges el contacto. En celulares compatibles también se puede **compartir con el Excel adjunto**.
 - **Excel** (botón arriba a la derecha): descarga un archivo con todos los resultados en hojas separadas: Resumen, KPI, Ventas por mes, Por paquete, Por lugar, Por tipo de evento, Patrones y decisiones, Proyección, Finanzas, Publicidad, GA4, Cotizaciones, Registros validados, Validación de datos y Consultas al asistente.
 - **PDF** (botón arriba a la derecha): imprime la pantalla que estás viendo, con sus gráficos. En el diálogo de impresión elige **"Guardar como PDF"**.
 - Cada **cotización** se puede imprimir o guardar en PDF desde Cotizaciones.

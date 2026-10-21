@@ -217,6 +217,9 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary-sof
 /* ---------- Impresión / PDF ---------- */
 .cot-print, .print-head { display: none; }
 .top-btn { padding: 6px 10px; }
+.btn-wsp { background: #25d366; border-color: #25d366; color: #fff; }
+.btn-wsp:hover { background: #1ebe5a; border-color: #1ebe5a; }
+.modal h2 .ico { vertical-align: -3px; color: #25d366; }
 @media print {
   @page { size: A4; margin: 12mm; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }

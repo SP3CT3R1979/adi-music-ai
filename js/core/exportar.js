@@ -22,15 +22,16 @@ ADI.exportar = (() => {
     return ws;
   }
 
-  function excel() {
-    if (!window.XLSX) { u.toast('No se cargó el generador de Excel.', 'error'); return; }
+  // Construye el libro de resultados; devuelve null si no hay datos.
+  function construirLibro() {
+    if (!window.XLSX) return null;
     const s = ADI.store.get();
     const v = ADI.kpi.analizar(s);
     const g = ADI.ga4.analizar(s.ga4);
     const p = ADI.proy.proyectar(s, { horizonte: 12 });
     const L = ADI.fin.libro(s);
     const pub = v.vacio ? null : ADI.pub.analizar(s);
-    if (v.vacio && g.vacio) { u.toast('Todavía no hay datos para exportar. Sube el Excel o el informe GA4.', 'error', 5000); return; }
+    if (v.vacio && g.vacio) return null;
 
     const wb = XLSX.utils.book_new();
     const add = (nombre, ws) => XLSX.utils.book_append_sheet(wb, ws, nombre.slice(0, 31));
@@ -129,10 +130,24 @@ ADI.exportar = (() => {
     }
     if ((s.chat || []).length) add('Consultas al asistente', hoja([['Quién', 'Mensaje', 'Fecha'], ...s.chat.map((m) => [m.rol === 'user' ? 'Pregunta' : (m.modo === 'claude' ? 'IA (Claude)' : m.modo === 'gemini' ? 'IA (Gemini)' : 'App (modo local)'), texto(m.texto), new Date(m.fecha).toLocaleString('es-PE')])]));
 
-    const nombre = `ADIX-Music-resultados-${u.today()}.xlsx`;
-    XLSX.writeFile(wb, nombre);
-    ADI.store.log('Resultados exportados a Excel', nombre);
-    u.toast(`Se descargó ${nombre}`, 'ok', 5000);
+    return { wb, nombre: `ADIX-Music-resultados-${u.today()}.xlsx` };
+  }
+
+  function excel() {
+    if (!window.XLSX) { u.toast('No se cargó el generador de Excel.', 'error'); return; }
+    const libro = construirLibro();
+    if (!libro) { u.toast('Todavía no hay datos para exportar. Sube el Excel o el informe GA4.', 'error', 5000); return; }
+    XLSX.writeFile(libro.wb, libro.nombre);
+    ADI.store.log('Resultados exportados a Excel', libro.nombre);
+    u.toast(`Se descargó ${libro.nombre}`, 'ok', 5000);
+  }
+
+  // El mismo Excel como archivo, para compartirlo (por ejemplo, por WhatsApp desde el celular).
+  function excelArchivo() {
+    const libro = construirLibro();
+    if (!libro) return null;
+    const datos = XLSX.write(libro.wb, { type: 'array', bookType: 'xlsx' });
+    return new File([datos], libro.nombre, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   }
 
   // Imprime la pantalla actual; desde el diálogo se puede "Guardar como PDF".
@@ -146,5 +161,5 @@ ADI.exportar = (() => {
     setTimeout(() => window.print(), 50);
   }
 
-  return { excel, pdf };
+  return { excel, excelArchivo, pdf };
 })();
