@@ -10,6 +10,17 @@ Aplicación web con inteligencia artificial que ayuda a Yilmar a entender los da
 2. En **Inicio** o **Ventas y KPI** pulsa **"Subir Excel"** y elige el archivo de ADIX Music. Por privacidad, el Excel del negocio **no está publicado** en este sitio: se carga desde la computadora y se queda solo en ese navegador.
 3. En **Analítica GA4** importa el informe de Google Analytics 4 o usa los **datos de demostración**.
 
+## Conectar Google Analytics 4 (sin exportar archivos)
+
+La app puede traer los datos de GA4 directamente con una **cuenta de servicio** de Google Cloud:
+
+1. En **GA4 → Administrar → Administración de acceso a la propiedad**, agrega el correo de la cuenta de servicio (por ejemplo `telemetria-app@telemetria-ga4.iam.gserviceaccount.com`) con el rol **Lector**.
+2. En **Google Cloud → APIs y servicios → Biblioteca**, activa la **Google Analytics Data API** en el mismo proyecto.
+3. En la app, ve a **Configuración → Google Analytics 4**, pega el **ID de la propiedad** (solo números, en GA4 → Administrar → Detalles de la propiedad) y carga el **archivo .json** de la clave de la cuenta de servicio.
+4. Pulsa **Guardar y probar conexión** y luego **Traer datos ahora**. Después puedes actualizar desde **Analítica GA4 → Actualizar desde GA4**.
+
+La app trae usuarios, usuarios nuevos, sesiones, sesiones con interacción, eventos clave, tiempo de interacción y vistas, por **mes × canal × campaña**. La inversión publicitaria no viene de GA4: se registra en Finanzas. El archivo de clave se guarda solo en ese navegador; **nunca lo subas a GitHub ni lo envíes por chat**.
+
 ## Exportar resultados
 
 - **WhatsApp** (botón verde arriba a la derecha): arma **un solo mensaje** con el panorama del negocio: ventas, rentabilidad, dinero, proyección de 3 meses, redes y web (GA4), publicidad, qué hacer y qué falta registrar, con cada KPI explicado en palabras simples. Se puede editar antes de enviar y abre WhatsApp (en el celular o en WhatsApp Web) con el mensaje listo. Si escribes un número (por ejemplo 987654321), se abre directo ese chat; si no, eliges el contacto. En celulares compatibles también se puede **compartir con el Excel adjunto**.
@@ -68,7 +79,7 @@ La app usa el logo de **ADIX Music Sonidos** (carpeta `img/`) y sus colores: neg
 
 ## Próximos pasos posibles
 
-- Conectar la **API de GA4** para que los datos se actualicen solos.
+- Programar la actualización automática de GA4 (hoy se actualiza con un botón).
 - **Enlazar el Excel** en OneDrive o Google Sheets en lugar de subirlo.
 - Pasar los datos a **Supabase** para tener acceso con usuario y contraseña desde varios dispositivos.
 - Registrar en cada contrato el **costo real**, el **origen del cliente** y el **estado de pago**, para calcular el margen real, el ROAS y la cobranza.

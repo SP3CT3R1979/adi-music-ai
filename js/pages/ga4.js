@@ -19,6 +19,19 @@ ADI.pages.ga4 = (() => {
     inp.click();
   }
 
+  // Conexión directa con la API de Google Analytics 4 (configurada en Configuración).
+  async function traerAPI() {
+    const m = ui.modal('<h2>Google Analytics 4</h2><p class="dots">Trayendo datos de la propiedad</p>');
+    try {
+      const n = await ADI.ga4api.importar();
+      ui.cerrarModal(); comp = {};
+      u.toast(`Se trajeron ${n} filas de Google Analytics.`, 'ok');
+      ADI.app.render();
+    } catch (e) {
+      m.innerHTML = `<h2>No se pudieron traer los datos</h2>${ui.banner('error', u.esc(e.message))}<div class="row" style="margin-top:12px"><a class="btn" href="#/configuracion">Revisar la conexión</a><span class="spacer"></span><button class="btn" data-close>Cerrar</button></div>`;
+    }
+  }
+
   function guardar(res) {
     ADI.store.update((s) => { s.ga4 = { fuente: { archivo: res.archivo, tipo: res.tipo, fecha: new Date().toISOString(), nota: res.nota || '' }, esDemo: !!res.esDemo, filas: res.filas, validacion: res.validacion }; });
     ADI.store.log('Importación GA4', `${res.filas.length} filas desde "${res.archivo}"${res.esDemo ? ' (demostración)' : ''}`);
@@ -33,7 +46,7 @@ ADI.pages.ga4 = (() => {
     if (!s.ga4?.filas?.length) {
       el.innerHTML = `<div class="stack">${ui.card('', ui.vacio('Importa un informe de Google Analytics 4',
         'Sube el informe exportado desde GA4 en CSV, Excel o PDF (el PDF lo lee la IA). Mientras no tengas un informe real puedes usar datos de demostración, que siempre se mostrarán marcados como tales.',
-        `<button class="btn btn-primary" id="g-imp">${ui.icon('upload')} Importar informe</button><button class="btn" id="g-demo">Usar datos de demostración</button>`))}
+        `${ADI.ga4api.configurado() ? `<button class="btn btn-primary" id="g-api">${ui.icon('download')} Traer datos de Google Analytics</button>` : '<a class="btn" href="#/configuracion">Conectar Google Analytics</a>'}<button class="btn${ADI.ga4api.configurado() ? '' : ' btn-primary'}" id="g-imp">${ui.icon('upload')} Importar informe</button><button class="btn" id="g-demo">Usar datos de demostración</button>`))}
         ${ui.card('¿Cómo exportar el informe desde GA4?', `<ol class="list">
           <li>Entra a <b>analytics.google.com</b> y abre la propiedad de ADIX Music.</li>
           <li>Ve a <b>Informes → Adquisición → Adquisición de tráfico</b> (o crea una Exploración con las dimensiones <i>Año y mes</i>, <i>Grupo de canales</i> y <i>Campaña</i>).</li>
@@ -41,6 +54,7 @@ ADI.pages.ga4 = (() => {
           <li>Importa ese archivo aquí. Más adelante se puede conectar la API de GA4 para que se actualice solo.</li></ol>`)}
       </div>`;
       el.querySelector('#g-imp').onclick = importar;
+      if (el.querySelector('#g-api')) el.querySelector('#g-api').onclick = traerAPI;
       el.querySelector('#g-demo').onclick = () => { try { guardar(ADI.ga4.cargarDemo()); } catch (e) { u.toast(e.message, 'error'); } };
       return;
     }
@@ -67,7 +81,7 @@ ADI.pages.ga4 = (() => {
         ${tieneMeses ? `<div class="filtros"><label>Mes <select id="g-a">${optsMes(comp.actual)}</select></label><label>comparar con <select id="g-b">${optsMes(comp.base)}</select></label></div>` : ''}</div>
         ${ui.validacion(s.ga4.validacion)}
         ${ultimoParcial && comp.actual === ventas.mesParcial ? '<p class="muted small" style="margin-top:8px">El último mes puede estar incompleto: compáralo con cuidado.</p>' : ''}`, {
-        acciones: `<button class="btn btn-sm" id="g-imp">${ui.icon('upload', 'ico ico-xs')} Importar otro informe</button><button class="btn btn-sm btn-danger" id="g-borrar">${ui.icon('trash', 'ico ico-xs')} Quitar</button>`,
+        acciones: `${ADI.ga4api.configurado() ? `<button class="btn btn-sm btn-primary" id="g-api">${ui.icon('download', 'ico ico-xs')} ${s.ga4.fuente.tipo === 'API' ? 'Actualizar desde GA4' : 'Traer datos de GA4'}</button>` : ''}<button class="btn btn-sm" id="g-imp">${ui.icon('upload', 'ico ico-xs')} Importar otro informe</button><button class="btn btn-sm btn-danger" id="g-borrar">${ui.icon('trash', 'ico ico-xs')} Quitar</button>`,
       })}
       <div class="kpis">
         ${ui.kpi({ titulo: 'Usuarios', valor: u.fmtNum(A.usuarios), delta: dl('usuarios'), sub: B ? `vs ${u.fmtNum(B.usuarios)}` : '', info: G.usuarios })}
@@ -94,6 +108,7 @@ ADI.pages.ga4 = (() => {
     </div>`;
 
     el.querySelector('#g-imp').onclick = importar;
+    if (el.querySelector('#g-api')) el.querySelector('#g-api').onclick = traerAPI;
     el.querySelector('#g-borrar').onclick = () => { if (confirm('¿Quitar el informe GA4 cargado?')) { ADI.store.update((x) => { x.ga4 = null; }); ADI.store.log('GA4 eliminado'); ADI.app.render(); } };
     if (tieneMeses) {
       el.querySelector('#g-a').onchange = (e) => { comp.actual = e.target.value; render(el); };

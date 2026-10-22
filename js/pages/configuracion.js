@@ -40,6 +40,21 @@ ADI.pages.configuracion = (() => {
           <p class="muted small" style="margin-top:10px">Los datos se guardan en este navegador (almacenamiento local). Haz respaldos con frecuencia y no uses la app en computadoras públicas sin PIN.</p>`)}
       </div>
 
+      ${ui.card('Google Analytics 4 (conexión directa)', `
+          <ol class="list small" style="margin-bottom:12px">
+            <li>En <b>GA4 → Administrar → Administración de acceso a la propiedad</b>, agrega el correo de la cuenta de servicio con el rol <b>Lector</b>.</li>
+            <li>En <b>Google Cloud → APIs y servicios → Biblioteca</b>, activa la <b>Google Analytics Data API</b>.</li>
+            <li>Pega el <b>ID de la propiedad</b> (solo números, en GA4 → Administrar → Detalles de la propiedad) y carga el <b>archivo .json</b> de la clave de la cuenta de servicio.</li>
+          </ol>
+          <form id="cf-ga4" class="form">
+            <label>ID de la propiedad de GA4<input name="prop" inputmode="numeric" placeholder="Ej.: 412345678" value="${u.esc(c.ga4PropertyId || '')}"></label>
+            <label class="full">Archivo de clave de la cuenta de servicio (.json)<input type="file" name="json" accept=".json,application/json"></label>
+            ${c.ga4Credencial ? `<p class="full small" style="margin:0">Credencial cargada: <b>${u.esc(c.ga4Credencial.client_email)}</b></p>` : ''}
+            <div class="row full"><button class="btn btn-primary" type="submit">Guardar y probar conexión</button>${c.ga4Credencial ? '<button class="btn btn-danger" type="button" id="cf-ga4-del">Quitar credencial</button>' : ''}</div>
+          </form>
+          <p class="muted small" style="margin-top:10px">⚠ El archivo de clave se guarda solo en este navegador. No lo subas a GitHub ni lo envíes por chat; si la computadora no es tuya, quítalo al terminar. La cuenta de servicio solo puede <b>leer</b> los datos de GA4.</p>
+          <div id="cf-ga4-res"></div>`, { sub: 'Trae usuarios, sesiones, canales, campañas y eventos clave por mes, sin exportar archivos.' })}
+
       ${ui.card('Parámetros del negocio', `<form id="cf-neg" class="form">
           <label>Nombre del negocio<input name="nombre" value="${u.esc(n.nombre)}"></label>
           <label>Gastos fijos mensuales (S/)<input type="number" min="0" step="10" name="gastosFijosMensuales" value="${n.gastosFijosMensuales ?? ''}"></label>
@@ -57,7 +72,7 @@ ADI.pages.configuracion = (() => {
         </tbody></table></div><div class="row" style="margin-top:10px"><button class="btn btn-sm" id="cf-paq-add">+ Agregar paquete</button></div>`, { sub: 'Se usan para estimar costos, márgenes y cotizaciones.' })}
 
       <div class="grid g2">
-        ${ui.card('Respaldo de datos', `<p class="muted small">Descarga una copia de todos los datos (ventas, GA4, finanzas, cotizaciones y conversación). No incluye las claves de IA ni el PIN.</p>
+        ${ui.card('Respaldo de datos', `<p class="muted small">Descarga una copia de todos los datos (ventas, GA4, finanzas, cotizaciones y conversación). No incluye las claves de IA, la credencial de Google Analytics ni el PIN.</p>
           <div class="row"><button class="btn" id="cf-exp">${ui.icon('download')} Descargar respaldo</button><button class="btn" id="cf-imp">${ui.icon('upload')} Restaurar respaldo</button><button class="btn btn-danger" id="cf-reset">${ui.icon('trash')} Borrar todos los datos</button></div>`)}
         ${ui.card('Historial de análisis y consultas', ui.tabla(['Fecha', 'Acción', 'Detalle'], s.historial.slice(0, 40).map((h) => [new Date(h.fecha).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' }), u.esc(h.accion), `<span class="small">${u.esc(h.detalle)}</span>`]), { vacioTxt: 'Todavía no hay actividad registrada.' }))}
       </div>
@@ -107,6 +122,36 @@ ADI.pages.configuracion = (() => {
     const pinDel = el.querySelector('#cf-pin-del');
     if (pinDel) pinDel.onclick = () => { if (confirm('¿Quitar el PIN de acceso?')) { ADI.store.update((x) => { x.config.pinHash = ''; }); render(el); ADI.app.estadoDatos(); } };
 
+    // Google Analytics 4
+    el.querySelector('#cf-ga4').onsubmit = async (e) => {
+      e.preventDefault();
+      const f = e.target, res = el.querySelector('#cf-ga4-res');
+      const prop = String(f.prop.value || '').replace(/\D/g, '');
+      try {
+        if (!prop) throw new Error('Escribe el ID de la propiedad (solo números).');
+        let cred = ADI.store.get().config.ga4Credencial;
+        if (f.json.files[0]) cred = ADI.ga4api.leerCredencial(await u.readAsText(f.json.files[0]));
+        if (!cred) throw new Error('Carga el archivo .json de la clave de la cuenta de servicio.');
+        ADI.store.update((x) => { x.config.ga4PropertyId = prop; x.config.ga4Credencial = cred; });
+        ADI.ga4api.olvidarToken();
+        res.innerHTML = '<p class="dots muted" style="margin-top:10px">Probando conexión con Google Analytics</p>';
+        const r = await ADI.ga4api.probar();
+        render(el);
+        const box = el.querySelector('#cf-ga4-res');
+        box.innerHTML = ui.banner('ok', `Conexión correcta con la propiedad <b>${u.esc(r.propiedad)}</b>: ${u.fmtNum(r.usuarios)} usuarios en los últimos 7 días.`) + '<div class="row" style="margin-top:10px"><button class="btn btn-primary" id="cf-ga4-traer">Traer datos ahora</button></div>';
+        box.querySelector('#cf-ga4-traer').onclick = async (ev) => {
+          ev.target.disabled = true; ev.target.textContent = 'Trayendo datos…';
+          try { const n = await ADI.ga4api.importar(); u.toast(`Se trajeron ${n} filas de Google Analytics.`, 'ok'); location.hash = '#/ga4'; }
+          catch (err) { box.insertAdjacentHTML('beforeend', ui.banner('error', u.esc(err.message))); ev.target.disabled = false; ev.target.textContent = 'Traer datos ahora'; }
+        };
+        ADI.store.log('GA4 conectado', `propiedad ${r.propiedad}`);
+      } catch (err) {
+        (el.querySelector('#cf-ga4-res') || res).innerHTML = ui.banner('error', u.esc(err.message));
+      }
+    };
+    const ga4Del = el.querySelector('#cf-ga4-del');
+    if (ga4Del) ga4Del.onclick = () => { if (confirm('¿Quitar la credencial de Google Analytics de este navegador?')) { ADI.store.update((x) => { x.config.ga4Credencial = null; }); ADI.ga4api.olvidarToken(); render(el); } };
+
     // Parámetros
     el.querySelector('#cf-neg').onsubmit = (e) => {
       e.preventDefault();
@@ -134,7 +179,7 @@ ADI.pages.configuracion = (() => {
     // Respaldo
     el.querySelector('#cf-exp').onclick = () => {
       const copia = JSON.parse(JSON.stringify(ADI.store.get()));
-      copia.config = { ...copia.config, geminiKey: '', claudeKey: '', pinHash: '' };
+      copia.config = { ...copia.config, geminiKey: '', claudeKey: '', ga4Credencial: null, pinHash: '' };
       u.download(`respaldo-adi-music-ai-${u.today()}.json`, JSON.stringify(copia, null, 1));
       ADI.store.log('Respaldo descargado');
     };
@@ -146,7 +191,7 @@ ADI.pages.configuracion = (() => {
           if (!data || typeof data !== 'object' || !('negocio' in data)) throw new Error('El archivo no es un respaldo de ADIX Music AI.');
           if (!confirm('Se reemplazarán los datos actuales por los del respaldo. ¿Continuar?')) return;
           const cfg = ADI.store.get().config;
-          ADI.store.replaceAll({ ...data, config: { ...data.config, geminiKey: cfg.geminiKey, claudeKey: cfg.claudeKey, pinHash: cfg.pinHash } });
+          ADI.store.replaceAll({ ...data, config: { ...data.config, geminiKey: cfg.geminiKey, claudeKey: cfg.claudeKey, ga4Credencial: cfg.ga4Credencial, pinHash: cfg.pinHash } });
           ADI.store.log('Respaldo restaurado', inp.files[0].name);
           u.toast('Respaldo restaurado.', 'ok'); ADI.app.render();
         } catch (err) { u.toast(err.message || 'No se pudo leer el respaldo.', 'error'); }
